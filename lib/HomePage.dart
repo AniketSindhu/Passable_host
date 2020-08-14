@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:passable_host/Methods/googleSignIn.dart';
+import 'package:passable_host/createEvent.dart';
 import 'package:passable_host/loginui.dart';
 import 'package:passable_host/methods/getUserId.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -41,6 +42,13 @@ class _HomePageState extends State<HomePage> {
     double height=SizeConfig.getHeight(context);
     double width=SizeConfig.getWidth(context);
     return Scaffold(
+      floatingActionButton:FloatingActionButton.extended(
+       backgroundColor: AppColors.tertiary,
+       onPressed: (){
+         Navigator.push(context, MaterialPageRoute(builder:(context)=>CreateEvent(uid)));
+       },
+       label: Text("Host an event",style: TextStyle(fontWeight:FontWeight.w500),),
+       icon: Icon(Icons.add),),
       body:Column(
         children: [
           Container(
