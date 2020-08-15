@@ -31,7 +31,10 @@ class FirebaseAdd{
      eventNameArr.add(eventName.substring(0,j).toLowerCase());
 
   Firestore.instance.collection('users').document(uid).collection('eventsHosted').document(eventCode)
-    .setData({'eventCode':eventCode});
+    .setData({
+      'eventCode':eventCode,
+      'isTeam':false
+    });
   
   await Firestore.instance.collection('events').document(eventCode).setData({
       'eventCode':eventCode,

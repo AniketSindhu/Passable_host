@@ -4,6 +4,7 @@ import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:passable_host/HomePage.dart';
 import 'package:passable_host/Methods/firebaseAdd.dart';
 import 'package:passable_host/loginui.dart';
 import 'package:random_string/random_string.dart';
@@ -61,12 +62,12 @@ class _CreateEventState extends State<CreateEvent> {
     }
   }
   void showPlacePicker() async {
-  print(FlutterConfig.get('MAP_API_kEY'));
    Navigator.push(
    context,
     MaterialPageRoute(
       builder: (context) => PlacePicker(
-        apiKey: FlutterConfig.get('MAP_API_kEY'), 
+        //apiKey: 'AIzaSyAJBaI8jdFjekZnRgtJ10DsNVF3RuSfXfc', 
+        apiKey:  'api key', 
         onPlacePicked: (result) { 
          setState(() {
           mainResult=result;
@@ -325,6 +326,7 @@ class _CongoScreenState extends State<CongoScreen> {
             onPressed:(){
               Navigator.of(context)
               .popUntil(ModalRoute.withName("/homepage"));
+              Navigator.push(context, MaterialPageRoute(builder: (context){return HomePage();}));
             },
             icon: Icon(Icons.play_arrow),
             tooltip: 'continue',
