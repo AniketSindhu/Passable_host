@@ -61,11 +61,12 @@ class _CreateEventState extends State<CreateEvent> {
     }
   }
   void showPlacePicker() async {
+  print(FlutterConfig.get('MAP_API_kEY'));
    Navigator.push(
    context,
     MaterialPageRoute(
       builder: (context) => PlacePicker(
-        apiKey: FlutterConfig.get('MAP_API_kEY'),   // Put YOUR OWN KEY here.
+        apiKey: FlutterConfig.get('MAP_API_kEY'), 
         onPlacePicked: (result) { 
          setState(() {
           mainResult=result;

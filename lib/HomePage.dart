@@ -7,6 +7,7 @@ import 'package:passable_host/Methods/googleSignIn.dart';
 import 'package:passable_host/createEvent.dart';
 import 'package:passable_host/loginui.dart';
 import 'package:passable_host/methods/getUserId.dart';
+import 'package:passable_host/methods/googleSignIn.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/eventCard.dart';
 import 'config/config.dart';
@@ -83,7 +84,7 @@ class _HomePageState extends State<HomePage> {
                     {
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       prefs.clear();
-                      signOutGoogle();
+                      signOut();
                       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context)=>Login()),ModalRoute.withName('homepage'));
                     }
                   },

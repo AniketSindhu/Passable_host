@@ -3,8 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:passable_host/HomePage.dart';
-import 'package:passable_host/HomePage.dart';
-import 'package:passable_host/Methods/firebaseAdd.dart';
 import 'package:passable_host/userInfo.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -40,7 +38,6 @@ Future<String> signInWithGoogle(BuildContext context) async {
     {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       prefs.setBool('login', true);
-      prefs.setString('userid', user.uid);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomePage()));
     }
   else{
@@ -52,7 +49,8 @@ Future<String> signInWithGoogle(BuildContext context) async {
   return 'signInWithGoogle succeeded: $user';
 }
 
-void signOutGoogle() async{
+void signOut() async{
   await googleSignIn.signOut();
+  await FirebaseAuth.instance.signOut();
   print("User Sign Out");
 }
