@@ -29,9 +29,11 @@ class _DetailPageState extends State<DetailPage> {
   TextEditingController eventCodeController=TextEditingController();
   String writtenCode,passCode;
   int page=0;
-  List<Widget> _eventBottomList=[
-
-  ];
+  bool isTeam;
+  void isTeamMember() async{
+    final x = await Firestore.instance.collection('users').document(widget.uid).collection('eventsHosted').document(widget.post.data['eventCode']).get();
+    isTeam=x.data['isTeam'];
+  }
   void showPass()async{
     String passCode;
     await Firestore.instance.collection('users').document(widget.uid).collection('eventJoined').where('eventCode',isEqualTo:widget.post.data['eventCode']).getDocuments()
@@ -106,7 +108,11 @@ class _DetailPageState extends State<DetailPage> {
       eventCodeController.clear();
     });
   }
-
+  @override
+  void initState(){
+    super.initState();
+    isTeamMember();
+  }
   @override
   Widget build(BuildContext context) {
     double width=SizeConfig.getWidth(context);
@@ -135,6 +141,25 @@ class _DetailPageState extends State<DetailPage> {
       appBar: AppBar(
         title:Text(page==0?"Event Details":page==1?'Dashboard':page==2?'Check In':page==3?'Team':'Announcements',),
         centerTitle: true,
+        actions:<Widget>[
+          page==3?
+            Padding(
+              padding: const EdgeInsets.only(right:8.0),
+              child: Tooltip(
+                padding: EdgeInsets.all(20),
+                preferBelow: true,
+                showDuration: Duration(seconds:5),
+                message: 'What can team members do?\n\n'
+                          '1. They can scan passes (check in the guests)\n'
+                          '2. They can make announcements\n'
+                          '3. They cant change event deatails',
+                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: AppColors.tertiary),
+                child: Icon(Icons.info,color: AppColors.tertiary,size: 30,),
+                textStyle: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.black),
+                verticalOffset: 10,
+              ),
+            ):Container()
+        ],
         backgroundColor: AppColors.primary,
       ),
       body:page==0?SingleChildScrollView(
@@ -358,7 +383,7 @@ class _DetailPageState extends State<DetailPage> {
             ],
           ),
         )
-      ):page==1?Dashboard():page==2?ScanPass(widget.post.data['eventCode']):page==3?TeamPage(widget.post.data['eventCode']):Announcements(widget.post.data['eventCode'], true)
+      ):page==1?Dashboard():page==2?ScanPass(widget.post.data['eventCode']):page==3?TeamPage(widget.post.data['eventCode'],isTeam):Announcements(widget.post.data['eventCode'], true)
     );
   }
 }
