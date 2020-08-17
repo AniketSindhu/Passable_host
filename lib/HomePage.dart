@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                   child: ListView.builder(
                   itemCount: snapshot.data.length,
                   itemBuilder:(context,index){
-                    return eventCard(snapshot.data[index], height, width, 1, context);
+                    return eventCard(snapshot.data[index], height, width, context);
                   }
                 ),
               );

@@ -134,9 +134,7 @@ class _ScanPassState extends State<ScanPass> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title:Text('Scan passes',),),
-      body:SingleChildScrollView(
+    return SingleChildScrollView(
         child: Container(
           child:Center(
             child:Column(
@@ -169,7 +167,6 @@ class _ScanPassState extends State<ScanPass> {
             )
           )
         ),
-      )
     );
   }
 }

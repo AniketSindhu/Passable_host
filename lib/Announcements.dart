@@ -26,11 +26,6 @@ class _AnnouncementsState extends State<Announcements> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:Text("Announcements",),
-        centerTitle: true,
-        backgroundColor: AppColors.primary,
-      ),
       floatingActionButton: widget.isOwner?FloatingActionButton.extended(
         onPressed:()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateAnnouncement(widget.eventCode))),
         icon: Icon(Icons.add,),

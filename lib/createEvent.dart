@@ -427,7 +427,6 @@ class MaxGuests extends StatefulWidget {
 }
 
 class _MaxGuestsState extends State<MaxGuests> {
-  @override
   int maxAttendees;
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   FirebaseUser _user;

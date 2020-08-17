@@ -5,7 +5,9 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:passable_host/Announcements.dart';
+import 'package:passable_host/Dashboard.dart';
 import 'package:passable_host/Models/user.dart';
+import 'package:passable_host/Team.dart';
 import 'package:passable_host/config/size.dart';
 import 'package:passable_host/lists.dart';
 import 'package:passable_host/scanPass.dart';
@@ -13,12 +15,12 @@ import 'package:random_string/random_string.dart';
 import 'Pass.dart';
 import 'config/config.dart';
 import 'package:flutter_show_more/flutter_show_more.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 
 class DetailPage extends StatefulWidget {
   final DocumentSnapshot post;
   final String uid;
-  final int currentIndex;
-  DetailPage(this.currentIndex,this.post,this.uid);
+  DetailPage(this.post,this.uid);
   @override
   _DetailPageState createState() => _DetailPageState();
 }
@@ -26,7 +28,10 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   TextEditingController eventCodeController=TextEditingController();
   String writtenCode,passCode;
-  
+  int page=0;
+  List<Widget> _eventBottomList=[
+
+  ];
   void showPass()async{
     String passCode;
     await Firestore.instance.collection('users').document(widget.uid).collection('eventJoined').where('eventCode',isEqualTo:widget.post.data['eventCode']).getDocuments()
@@ -107,12 +112,32 @@ class _DetailPageState extends State<DetailPage> {
     double width=SizeConfig.getWidth(context);
     double height=SizeConfig.getHeight(context);
     return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(FontAwesome.edit),title: Text('Event Info'),backgroundColor: AppColors.primary,),
+          BottomNavigationBarItem(icon: Icon(Icons.dashboard),title:Text('Dashboard'),backgroundColor: AppColors.primary,),
+          BottomNavigationBarItem(icon: Icon(FontAwesome.qrcode),title:Text('Check in'),backgroundColor: AppColors.primary,),
+          BottomNavigationBarItem(icon: Icon(FontAwesome.users),title:Text('Team'),backgroundColor: AppColors.primary,),
+          BottomNavigationBarItem(icon: Icon(FontAwesome.bullhorn),title:Text('Announcements'),backgroundColor: AppColors.primary,),
+        ],
+        elevation: 5,
+        unselectedItemColor: AppColors.secondary,
+        currentIndex: page,
+        backgroundColor: Colors.purple,
+        selectedItemColor: AppColors.tertiary,
+        showUnselectedLabels: true,
+        onTap:(index){
+          setState(() {
+            page=index;
+          });
+        },
+      ),
       appBar: AppBar(
-        title:Text("Event Details",),
+        title:Text(page==0?"Event Details":page==1?'Dashboard':page==2?'Check In':page==3?'Team':'Announcements',),
         centerTitle: true,
         backgroundColor: AppColors.primary,
       ),
-      body:SingleChildScrollView(
+      body:page==0?SingleChildScrollView(
         child:Container(
           margin:EdgeInsets.symmetric(horizontal:width/25,vertical: height*0.02),
           child: Column(
@@ -150,7 +175,6 @@ class _DetailPageState extends State<DetailPage> {
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: [
-                                      if(widget.currentIndex==1)
                                       RaisedButton(
                                         onPressed:(){
                                           Navigator.push(context, MaterialPageRoute(builder: (context){return ScanPass(widget.post.data['eventCode']);}));
@@ -161,28 +185,12 @@ class _DetailPageState extends State<DetailPage> {
                                       ),
                                       RaisedButton(
                                         onPressed:(){
-                                          widget.currentIndex==0?
-                                            getPass(context, height):
-                                          widget.currentIndex==1?
-                                          
-                                            Navigator.push(context, MaterialPageRoute(builder: (context){return Announcements(widget.post.data['eventCode'],true);}))
-                                           //make announcements
-                                          :showPass();
+                                            Navigator.push(context, MaterialPageRoute(builder: (context){return Announcements(widget.post.data['eventCode'],true);}));
                                         },
-                                        child: Text(widget.currentIndex==0?'Get Pass':widget.currentIndex==1?'Announcements':'Show Pass',style: TextStyle(fontSize:16),),
+                                        child: Text('Announcements',style: TextStyle(fontSize:16),),
                                         color: AppColors.tertiary,
                                         splashColor: AppColors.primary,
                                       ),
-                                      widget.currentIndex==2?
-                                      RaisedButton(
-                                        onPressed:(){
-                                          Navigator.push(context, MaterialPageRoute(builder: (context){return Announcements(widget.post.data['eventCode'],false);}));
-                                           //make announcements
-                                        },
-                                        child: Text("Announcements",style: TextStyle(fontSize:16),),
-                                        color: AppColors.tertiary,
-                                        splashColor: AppColors.primary,
-                                      ):Container()
                                     ],
                                   ),
                                 ),
@@ -196,7 +204,6 @@ class _DetailPageState extends State<DetailPage> {
                 ),
               ),
               SizedBox(height:15),
-              if(widget.currentIndex==1)
               Align(
                 alignment:Alignment.centerLeft,
                 child: Row(
@@ -238,14 +245,12 @@ class _DetailPageState extends State<DetailPage> {
               SizedBox(height:15),
               Text('${widget.post.data['eventAddress']}',style: TextStyle(fontSize: 18),),
               SizedBox(height:20),
-              if(widget.currentIndex==1)
               Align(
                 child: Text('Event Dashboard',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
                 alignment: Alignment.centerLeft,
               ),
-              if(widget.currentIndex==1)Divider(color:AppColors.secondary,height: 10,thickness: 2,),
-              if(widget.currentIndex==1)SizedBox(height:10),
-              if(widget.currentIndex==1)             
+              Divider(color:AppColors.secondary,height: 10,thickness: 2,),
+              SizedBox(height:10),              
               Material(
                 elevation: 8.0,
                 borderRadius: BorderRadius.circular(12.0),
@@ -284,8 +289,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                 ),
               ),
-              if(widget.currentIndex==1)SizedBox(height:10),
-              if(widget.currentIndex==1)
+              SizedBox(height:10), 
               Material(
                 elevation: 8.0,
                 borderRadius: BorderRadius.circular(12.0),
@@ -332,7 +336,7 @@ class _DetailPageState extends State<DetailPage> {
                     ),
                 ),
               ),
-              if(widget.currentIndex==1)SizedBox(height:30),
+              SizedBox(height:30),
               Align(
                 child: Text('Event Description',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
                 alignment: Alignment.centerLeft,
@@ -354,7 +358,7 @@ class _DetailPageState extends State<DetailPage> {
             ],
           ),
         )
-      )
+      ):page==1?Dashboard():page==2?ScanPass(widget.post.data['eventCode']):page==3?TeamPage(widget.post.data['eventCode']):Announcements(widget.post.data['eventCode'], true)
     );
   }
 }
