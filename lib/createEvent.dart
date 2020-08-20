@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:international_phone_input/international_phone_input.dart';
 import 'package:lottie/lottie.dart';
 import 'package:passable_host/HomePage.dart';
 import 'package:passable_host/Methods/firebaseAdd.dart';
@@ -34,6 +36,9 @@ class _CreateEventState extends State<CreateEvent> {
   bool _autoValidate = false;
   Geoflutterfire geo = Geoflutterfire();
   String eventName,eventDescription,eventAddress,eventCode;
+  String hostName,hostEmail,hostPhoneNumber;
+  String _phone;
+  String isoCode;
   int maxAttendees;
   bool imageDone=false;
   File _image;
@@ -41,19 +46,95 @@ class _CreateEventState extends State<CreateEvent> {
   GeoFirePoint myLocation ;
   DateTime dateTime;
   final picker = ImagePicker();
+  final hostNameController=TextEditingController();
+  final hostEmailController=TextEditingController();
+  final hostPhoneController=TextEditingController();
   final nameController=TextEditingController();
   final descriptionController=TextEditingController();
   final eventAddController=TextEditingController();
   final maxAttendeeController=TextEditingController();
+  String selectedCategory;
+  List<DropdownMenuItem> categoryList=[
+    DropdownMenuItem(
+      child: Text('Appearance/Singing',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Appearance/Singing',
+    ),
+    DropdownMenuItem(
+      child: Text('Attaraction',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Attaraction',
+    ),
+    DropdownMenuItem(
+      child: Text('Camp, Trip or Retreat',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Camp, Trip or Retreat',
+    ),
+    DropdownMenuItem(
+      child: Text('Class, Training, or Workshop',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Class, Training, or Workshop',
+    ),
+    DropdownMenuItem(
+      child: Text('Concert/Performance',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Concert/Performance',
+    ),
+    DropdownMenuItem(
+      child: Text('Conference',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Conference',
+    ),
+    DropdownMenuItem(
+      child: Text('Convention',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Convention',
+    ),
+    DropdownMenuItem(
+      child: Text('Dinner or Gala',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Dinner or Gala',
+    ),
+    DropdownMenuItem(
+      child: Text('Festival or Fair',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Festival or Fair',
+    ),
+    DropdownMenuItem(
+      child: Text('Game or Competition',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Game or Competition',
+    ),
+    DropdownMenuItem(
+      child: Text('Meeting/Networking event',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Meeting/Networking event',
+    ),
+    DropdownMenuItem(
+      child: Text('Party/Social Gathering',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Party/Social Gathering',
+    ),
+    DropdownMenuItem(
+      child: Text('Other',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
+      value: 'Other',
+    ),
+  ];
+  
+  void _inputChange(
+    String number, String internationlizedPhoneNumber, String isoCode) {
+    setState(() {
+      isoCode = isoCode;
+      if (internationlizedPhoneNumber.isNotEmpty) {
+        hostPhoneNumber=internationlizedPhoneNumber;
+      }
+    });
+  }
   void _validateInputs() {
     if (_formKey.currentState.validate()) {
+      if (hostPhoneNumber== null) {
+        Fluttertoast.showToast(
+          msg:'Phone number is not valid :( ',
+          backgroundColor: Colors.red,
+          fontSize: 18 
+        );
+      }
+      else{
       _formKey.currentState.save();
       eventCode=randomAlphaNumeric(6);
       Navigator.push(context, MaterialPageRoute(builder: (context){return MaxGuests(eventName, eventCode, eventDescription, eventAddress,_image,dateTime, widget.uid,myLocation);}));
       FocusScopeNode currentFocus = FocusScope.of(context);
       if (!currentFocus.hasPrimaryFocus) {
         currentFocus.unfocus();
-      }
+      }}
      } else {
 //    If all data are not valid then start auto validation.
       setState(() {
@@ -66,8 +147,8 @@ class _CreateEventState extends State<CreateEvent> {
    context,
     MaterialPageRoute(
       builder: (context) => PlacePicker(
-        //apiKey: 'AIzaSyAJBaI8jdFjekZnRgtJ10DsNVF3RuSfXfc', 
-        apiKey:  'api key', 
+
+        apiKey:  FlutterConfig.get('MAP_API'), 
         onPlacePicked: (result) { 
          setState(() {
           mainResult=result;
@@ -87,208 +168,321 @@ class _CreateEventState extends State<CreateEvent> {
     double height=SizeConfig.getHeight(context);
     double width=SizeConfig.getWidth(context);
     return Scaffold(
-      body:ListView(
-        
-        children: <Widget>[
-          Container(
-            margin: EdgeInsets.only(left:width/15,top:height/25,right:width/15 ),
-            width: width,
-            child:RichText(
-              text: TextSpan(
-               children:<TextSpan>[
-                  TextSpan(text:"Create ",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold))),
-                  TextSpan(text:"An ",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.secondary,fontSize:35,fontWeight: FontWeight.bold))),
-                  TextSpan(text:"Event",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold)))
-                ] 
-              )
+      appBar: AppBar(
+        title:Text('Create an event',style: GoogleFonts.cabin(fontWeight:FontWeight.w600,fontSize: 25)),
+        centerTitle: true,
+      ),
+      body:Container(
+        margin: EdgeInsets.symmetric(horizontal:width/20),
+        child: ListView(
+          children: <Widget>[
+            SizedBox(height:15),
+            Padding(
+              padding: const EdgeInsets.only(top:8),
+              child: Text('Basic Info',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
             ),
-          ),
-          SizedBox(height:20),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal:width/15),
-            child: Text("*All fields are necessary",style: TextStyle(color:Colors.redAccent[400],fontStyle:FontStyle.italic,fontSize: 18),)),
-          SizedBox(height:20),
-          Form(
-            autovalidate: _autoValidate,
-            key: _formKey,
-            child:Column(
-              children: <Widget>[
-                CustomTextField(
-                  maxLines:1,
-                  number:false,
-                  width:0.5,
-                  radius: 5,
-                  controller: nameController,
-                  validator: (value) => value.length<2?'*must be 2 character long':null,
-                  hint: "Event Name",
-                  icon: Icon(Icons.sort_by_alpha,color:AppColors.secondary,),
-                  onSaved: (input){
-                    eventName=input;
-                  },  
-                ),
-                SizedBox(height:20),
-                CustomTextField(
-                  maxLines:5,
-                  number:false,
-                  width:0.5,
-                  radius: 5,
-                  controller: descriptionController,
-                  validator: (value) => value.length<2?'*must be 2 character long':null,
-                  hint: "Event Description",
-                  icon: Icon(Icons.border_color,color:AppColors.secondary,),
-                  onSaved: (input){
-                    eventDescription=input;
-                  },  
-                ),
-                SizedBox(height:20),
-                CustomTextField(
-                  maxLines:3,
-                  number:false,
-                  width:0.5,
-                  radius: 5,
-                  controller: eventAddController,
-                  validator: (value) => value.length<2?'*must be 2 character long':null,
-                  hint: "Event Address",
-                  icon: Icon(Icons.near_me,color:AppColors.secondary,),
-                  onSaved: (input){
-                    eventAddress=input;
-                  },  
-                ),
-                SizedBox(height:20),
-                FormField(
-                  validator: (value)=>dateTime==null?"*Date & time are neccessary":null,
-                  builder:(datecontext){
-                    return dateTime==null?FlatButton(
-                      shape: RoundedRectangleBorder(
-                        borderRadius:BorderRadius.circular(6)
-                      ),
-                      color: AppColors.secondary,
-                      onPressed: () {
-                        DatePicker.showDateTimePicker(context,
-                          showTitleActions: true,
-                          minTime: DateTime.now(),
-                          maxTime: DateTime.now().add(new Duration(days: 365)) ,onChanged: (date) {
-                           setState(() {
-                             dateTime=date;
-                           }); 
-                          }, onConfirm: (date) {
-                              setState(() {
-                                dateTime=date;
-                              }); 
-                          }, currentTime: DateTime.now(), locale: LocaleType.en);
-                      },
-                    child: Text(
-                      'Event Time & Date',
-                      style: TextStyle(color: AppColors.primary,fontSize:20,fontWeight: FontWeight.w700,),
-                    )):
-                    Container(
-                      child: OutlineButton(
-                        borderSide: BorderSide(color:AppColors.secondary,width:3),
-                        onPressed: (){
-                        DatePicker.showDateTimePicker(context,
-                          showTitleActions: true,
-                          minTime: DateTime.now(),
-                          maxTime: DateTime.now().add(new Duration(days: 365)) ,onChanged: (date) {
-                           setState(() {
-                             dateTime=date;
-                           }); 
-                          }, onConfirm: (date) {
-                           setState(() {
-                             dateTime=date;
-                           }); 
-                          }, currentTime: DateTime.now(), locale: LocaleType.en);                          
-                        },
-                        child: Text('${DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime)}',style: TextStyle(color:AppColors.primary,fontWeight:FontWeight.w500,fontSize:20),))
-                      );
-                  },
-                ),
-                SizedBox(height:20),
-                FormField(
-                  validator: (value)=>myLocation==null?"*Date & time are neccessary":null,
-                  builder: (context){
-                  return mainResult==null?
-                    Container(
-                      child: FlatButton(
-                        color: Colors.red[300],
-                        onPressed: (){
-                          showPlacePicker();
-                        },
-                    child: Text('Locate Event Address',style: TextStyle(color:Colors.white,fontWeight:FontWeight.w500,fontSize:17),))
-                    ):
-                    Column(
-                      children: <Widget>[
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text('${mainResult.formattedAddress}',style: TextStyle(color:Colors.cyan,fontWeight:FontWeight.w500,fontSize:16,fontStyle: FontStyle.italic),textAlign:TextAlign.center,),
+            Padding(
+              padding: const EdgeInsets.only(top:2,bottom:12),
+              child: Text(
+                'Name your event and tell event-goers why they should come. Add details that highlight what makes it unique.',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
+            ),
+            Form(
+              autovalidate: _autoValidate,
+              key: _formKey,
+              child:Column(
+                children: <Widget>[
+                  EventCreateTextField(
+                    maxLines:1,
+                    number:false,
+                    width:0.5,
+                    radius: 5,
+                    controller: nameController,
+                    validator: (value) => value.length<2?'*must be 2 character long':null,
+                    hint: "Event Name",
+                    icon: Icon(FontAwesome.font,color:AppColors.secondary,),
+                    onSaved: (input){
+                      eventName=input;
+                    },  
+                  ),
+                  SizedBox(height:20),
+                  EventCreateTextField(
+                    maxLines:5,
+                    number:false,
+                    width:0.5,
+                    radius: 5,
+                    controller: descriptionController,
+                    validator: (value) => value.length<2?'*must be 2 character long':null,
+                    hint: "Event Description",
+                    icon: Icon(Icons.border_color,color:AppColors.secondary,),
+                    onSaved: (input){
+                      eventDescription=input;
+                    },  
+                  ),
+                  SizedBox(height:20),
+                  DropdownButtonFormField(   
+                    items: categoryList,
+                    validator: (value)=>selectedCategory==null?'Select a category':null,
+                    decoration: InputDecoration(
+                        labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),
+                        labelText: 'Category of the event',
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: BorderSide(
+                            color:AppColors.primary,
+                            width: 1.5,
+                          ),
                         ),
-                        SizedBox(height:10),
-                        FlatButton(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide: BorderSide(
+                            color:AppColors.primary,
+                            width: 1.5,
+                          ),
+                        ),
+                    ),
+                    onChanged: (value){
+                      setState(() {
+                        selectedCategory=value;
+                      });
+                    },
+                  ),
+                  SizedBox(height:10),
+                  Divider(thickness:1),
+                  SizedBox(height:8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top:8),
+                      child: Text('Host Info',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top:2,bottom:12),
+                    child: Text(
+                      'Help guests by providing information about the host of the event, this info will be shown on the event page.',
+                      style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
+                  ),
+                  EventCreateTextField(
+                    maxLines:1,
+                    number:false,
+                    width:0.5,
+                    radius: 5,
+                    controller: hostNameController,
+                    validator: (value) => value.trim().length>0?null:'Enter a valid name',
+                    hint: "Host Name",
+                    icon: Icon(FontAwesome.font,color:AppColors.secondary,),
+                    onSaved: (input){
+                      hostName=input;
+                    },  
+                  ),
+                  SizedBox(height:20),
+                  EventCreateTextField(
+                    maxLines:1,
+                    number:false,
+                    width:0.5,
+                    radius: 5,
+                    controller: hostEmailController,
+                    validator: (value){
+                      {
+                        Pattern pattern =
+                            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                        RegExp regex = new RegExp(pattern);
+                        if (!regex.hasMatch(value))
+                          return 'Enter Valid Email';
+                        else
+                          return null;
+                      }
+                    },
+                    hint: "Host Email",
+                    icon: Icon(FontAwesome.at,color:AppColors.secondary,),
+                    onSaved: (input){
+                      hostEmail=input;
+                    },  
+                  ),
+                  SizedBox(height:20),
+                  FormField(
+                    builder:(context)=>InternationalPhoneInput(
+                    //border: OutlineInputBorder(borderSide: BorderSide(color:AppColors.primary,width:2,style:BorderStyle.solid)),
+                      initialPhoneNumber: _phone,
+                      initialSelection: '+91',
+                      onPhoneNumberChange: _inputChange,
+                      enabledCountries: ['+91'],
+                      decoration: InputDecoration(
+                        labelText: 'Host phone number',
+                        fillColor:AppColors.primary,
+                        focusColor: AppColors.primary,
+                        enabledBorder:OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: BorderSide(color:AppColors.primary,width:1.5)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(5),borderSide: BorderSide(color:AppColors.primary,width: 1.5)),
+                        labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height:10),
+                  Divider(thickness:1),
+                  SizedBox(height:8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top:8),
+                      child: Text('Location',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top:2,bottom:12),
+                    child: Text(
+                      'Help people in the area discover your event and let attendees know where to show up.',
+                      style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
+                  ),
+                  EventCreateTextField(
+                    maxLines:3,
+                    number:false,
+                    width:0.5,
+                    radius: 5,
+                    controller: eventAddController,
+                    validator: (value) => value.length<2?'*must be 2 character long':null,
+                    hint: "Event Address",
+                    icon: Icon(Icons.near_me,color:AppColors.secondary,),
+                    onSaved: (input){
+                      eventAddress=input;
+                    },  
+                  ),
+                  SizedBox(height:20),
+                  FormField(
+                    validator: (value)=>dateTime==null?"*Date & time are neccessary":null,
+                    builder:(datecontext){
+                      return dateTime==null?FlatButton(
+                        shape: RoundedRectangleBorder(
+                          borderRadius:BorderRadius.circular(6)
+                        ),
+                        color: AppColors.secondary,
+                        onPressed: () {
+                          DatePicker.showDateTimePicker(context,
+                            showTitleActions: true,
+                            minTime: DateTime.now(),
+                            maxTime: DateTime.now().add(new Duration(days: 365)) ,onChanged: (date) {
+                             setState(() {
+                               dateTime=date;
+                             }); 
+                            }, onConfirm: (date) {
+                                setState(() {
+                                  dateTime=date;
+                                }); 
+                            }, currentTime: DateTime.now(), locale: LocaleType.en);
+                        },
+                      child: Text(
+                        'Event Time & Date',
+                        style: TextStyle(color: AppColors.primary,fontSize:20,fontWeight: FontWeight.w700,),
+                      )):
+                      Container(
+                        child: OutlineButton(
+                          borderSide: BorderSide(color:AppColors.secondary,width:3),
+                          onPressed: (){
+                          DatePicker.showDateTimePicker(context,
+                            showTitleActions: true,
+                            minTime: DateTime.now(),
+                            maxTime: DateTime.now().add(new Duration(days: 365)) ,onChanged: (date) {
+                             setState(() {
+                               dateTime=date;
+                             }); 
+                            }, onConfirm: (date) {
+                             setState(() {
+                               dateTime=date;
+                             }); 
+                            }, currentTime: DateTime.now(), locale: LocaleType.en);                          
+                          },
+                          child: Text('${DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime)}',style: TextStyle(color:AppColors.primary,fontWeight:FontWeight.w500,fontSize:20),))
+                        );
+                    },
+                  ),
+                  SizedBox(height:20),
+                  FormField(
+                    validator: (value)=>myLocation==null?"*Date & time are neccessary":null,
+                    builder: (context){
+                    return mainResult==null?
+                      Container(
+                        child: FlatButton(
                           color: Colors.red[300],
                           onPressed: (){
                             showPlacePicker();
                           },
-                        child: Text('Change Location',style: TextStyle(color:Colors.white,fontWeight:FontWeight.w500,fontSize:17),))                        
+                      child: Text('Locate Event Address',style: TextStyle(color:Colors.white,fontWeight:FontWeight.w500,fontSize:17),))
+                      ):
+                      Column(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('${mainResult.formattedAddress}',style: TextStyle(color:Colors.cyan,fontWeight:FontWeight.w500,fontSize:16,fontStyle: FontStyle.italic),textAlign:TextAlign.center,),
+                          ),
+                          SizedBox(height:10),
+                          FlatButton(
+                            color: Colors.red[300],
+                            onPressed: (){
+                              showPlacePicker();
+                            },
+                          child: Text('Change Location',style: TextStyle(color:Colors.white,fontWeight:FontWeight.w500,fontSize:17),))                        
+                        ],
+                      );
+                    },
+                  ),
+                  SizedBox(height:13),                
+                  FormField(
+                    validator:(value)=>_image==null?'*Must upload a photo':null,
+                    onSaved:(input){imageDone=true;},
+                    builder: (context){
+                    return _image==null?Column(
+                      children: <Widget>[
+                        Container(
+                          height: 80,
+                          width: 80,
+                          child: IconButton(
+                            icon: Icon(Icons.image,size:60,color: AppColors.secondary,),
+                            onPressed:()async{
+                              final pickedFile = await picker.getImage(source: ImageSource.gallery);
+                              setState(() {
+                                _image = File(pickedFile.path);
+                              });
+                            }
+                          ),
+                        ),
+                        Text('Upload event poster (vertical)',style: TextStyle(color:AppColors.primary,fontSize:20,fontWeight: FontWeight.w700),)
                       ],
-                    );
-                  },
-                ),
-                SizedBox(height:13),                
-                FormField(
-                  validator:(value)=>_image==null?'*Must upload a photo':null,
-                  onSaved:(input){imageDone=true;},
-                  builder: (context){
-                  return _image==null?Column(
-                    children: <Widget>[
-                      Container(
-                        height: 80,
-                        width: 80,
-                        child: IconButton(
-                          icon: Icon(Icons.image,size:60,color: AppColors.secondary,),
-                          onPressed:()async{
+                    ):
+                    Column(
+                      children: <Widget>[
+                        Center(child: Image.file(_image,fit: BoxFit.contain,width:width*0.8,)),
+                        SizedBox(height:10),
+                        OutlineButton(
+                          borderSide: BorderSide(color:AppColors.secondary,width:3),
+                          onPressed:() async{
                             final pickedFile = await picker.getImage(source: ImageSource.gallery);
                             setState(() {
                               _image = File(pickedFile.path);
-                            });
-                          }
+                            });                          
+                          },
+                          child: Text("Change banner?",style: TextStyle(color:AppColors.primary,fontWeight:FontWeight.w500,fontSize:20,fontStyle: FontStyle.italic),),
                         ),
-                      ),
-                      Text('Upload event poster (vertical)',style: TextStyle(color:AppColors.primary,fontSize:20,fontWeight: FontWeight.w700),)
-                    ],
-                  ):
-                  Column(
-                    children: <Widget>[
-                      Center(child: Image.file(_image,fit: BoxFit.contain,width:width*0.8,)),
-                      SizedBox(height:10),
-                      OutlineButton(
-                        borderSide: BorderSide(color:AppColors.secondary,width:3),
-                        onPressed:() async{
-                          final pickedFile = await picker.getImage(source: ImageSource.gallery);
-                          setState(() {
-                            _image = File(pickedFile.path);
-                          });                          
-                        },
-                        child: Text("Change banner?",style: TextStyle(color:AppColors.primary,fontWeight:FontWeight.w500,fontSize:20,fontStyle: FontStyle.italic),),
-                      ),
-                    ],
-                  );
-                }),
-              ],
-            )
-          ),
-          SizedBox(height:20),
-          Align(
-            child: Padding(
-              padding: const EdgeInsets.only(bottom:15.0),
-              child: RaisedButton(
-                onPressed:(){
-                  _validateInputs();
-                },
-                child: Text('Create event',style: TextStyle(fontSize:20),),
-                color: AppColors.tertiary,
-                 ),
+                      ],
+                    );
+                  }),
+                ],
+              )
             ),
-          )
-        ],
+            SizedBox(height:20),
+            Align(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom:15.0),
+                child: RaisedButton(
+                  onPressed:(){
+                    _validateInputs();
+                  },
+                  child: Text('Create event',style: TextStyle(fontSize:20),),
+                  color: AppColors.tertiary,
+                   ),
+              ),
+            )
+          ],
+        ),
       )     
     );
   }
@@ -505,6 +699,7 @@ class _MaxGuestsState extends State<MaxGuests> {
       }
     else{
     var options = {
+      //'key':'rzp_test_df25oDEIBVWDyE',
       'key': FlutterConfig.get('Razor_Pay'),
       'amount': pay,
       'name': '${widget.eventName}',
@@ -586,6 +781,81 @@ class _MaxGuestsState extends State<MaxGuests> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class EventCreateTextField extends StatelessWidget {
+
+  EventCreateTextField(
+      {this.icon,
+      this.hint,
+      this.obsecure = false,
+      this.validator,
+      this.controller,
+      this.maxLines,
+      this.minLines,
+      this.onSaved,
+      this.radius,
+      this.number,
+      this.color,
+      this.width,
+      this.onChanged});
+
+  final TextEditingController controller;
+  final FormFieldSetter<String> onSaved;
+  final FormFieldSetter<String> onChanged;
+  final int maxLines;
+  final int minLines;
+  final Icon icon;
+  final String hint;
+  final bool obsecure;
+  final bool number;
+  final double radius;
+  final Color color;
+  final double width;
+
+  final FormFieldValidator<String> validator;
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      onChanged: onChanged,
+      onSaved: onSaved,
+      validator: validator,
+      maxLines: maxLines,
+      minLines: minLines,
+      obscureText: obsecure,
+      keyboardType: number?TextInputType.number:TextInputType.text,
+      textCapitalization: TextCapitalization.sentences,
+      controller: controller,
+      style: TextStyle(
+        fontSize: 20,
+        color: AppColors.primary
+      ),
+      decoration: InputDecoration(
+          labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),
+          labelText: hint,
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(radius==null?20:radius),
+            borderSide: BorderSide(
+              color: color==null?AppColors.primary:color,
+              width: 1.5,
+            ),
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(radius==null?20:radius),
+            borderSide: BorderSide(
+              color: color==null?AppColors.primary:color,
+              width: width==null?1.5:width,
+            ),
+          ),
+          prefixIcon: Padding(
+            child: IconTheme(
+              data: IconThemeData(color: AppColors.primary),
+              child: icon,
+            ),
+            padding: EdgeInsets.only(left: 25, right: 10),
+          )),
     );
   }
 }

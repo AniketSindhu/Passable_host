@@ -28,6 +28,7 @@ class DetailPage extends StatefulWidget {
 class _DetailPageState extends State<DetailPage> {
   TextEditingController eventCodeController=TextEditingController();
   String writtenCode,passCode;
+  final _key = new GlobalKey();
   int page=0;
   bool isTeam;
   void isTeamMember() async{
@@ -145,18 +146,25 @@ class _DetailPageState extends State<DetailPage> {
           page==3?
             Padding(
               padding: const EdgeInsets.only(right:8.0),
-              child: Tooltip(
-                padding: EdgeInsets.all(20),
-                preferBelow: true,
-                showDuration: Duration(seconds:5),
-                message: 'What can team members do?\n\n'
-                          '1. They can scan passes (check in the guests)\n'
-                          '2. They can make announcements\n'
-                          '3. They cant change event deatails',
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: AppColors.tertiary),
-                child: Icon(Icons.info,color: AppColors.tertiary,size: 30,),
-                textStyle: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.black),
-                verticalOffset: 10,
+              child: GestureDetector(
+                onTap: (){
+                  final dynamic tooltip = _key.currentState;
+                  tooltip.ensureTooltipVisible();
+                },
+                child: Tooltip(
+                  key: _key,
+                  padding: EdgeInsets.all(20),
+                  preferBelow: true,
+                  showDuration: Duration(seconds:5),
+                  message: 'What can team members do?\n\n'
+                            '1. They can scan passes (check in the guests)\n'
+                            '2. They can make announcements\n'
+                            '3. They cant change event deatails',
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10),color: AppColors.tertiary),
+                  child: Icon(Icons.info,color: AppColors.tertiary,size: 30,),
+                  textStyle: TextStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.black),
+                  verticalOffset: 10,
+                ),
               ),
             ):Container()
         ],
@@ -186,40 +194,18 @@ class _DetailPageState extends State<DetailPage> {
                                 child: Text("${widget.post.data['eventName']}",style: GoogleFonts.varelaRound(textStyle:TextStyle(fontWeight:FontWeight.w600,fontSize: 22))),
                               ),
                               SizedBox(height:5),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Text('${DateFormat('hh:mm a').format(widget.post.data['eventDateTime'].toDate())}',style: TextStyle(fontWeight:FontWeight.w600,fontSize: 18),)
-                              ),
-                              Align(
-                                alignment: Alignment.topLeft,
-                                child: Text('${DateFormat('EEE, d MMMM yyyy').format(widget.post.data['eventDateTime'].toDate())}',style: TextStyle(fontWeight:FontWeight.w400,fontSize: 14),)
-                              ),
-                              Expanded(
-                                child: Align(
-                                  alignment: Alignment.bottomCenter,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: [
-                                      RaisedButton(
-                                        onPressed:(){
-                                          Navigator.push(context, MaterialPageRoute(builder: (context){return ScanPass(widget.post.data['eventCode']);}));
-                                        },
-                                        color: AppColors.tertiary,
-                                        splashColor: AppColors.primary,
-                                        child:Text('Scan Passes',style: TextStyle(fontSize:16),)
-                                      ),
-                                      RaisedButton(
-                                        onPressed:(){
-                                            Navigator.push(context, MaterialPageRoute(builder: (context){return Announcements(widget.post.data['eventCode'],true);}));
-                                        },
-                                        child: Text('Announcements',style: TextStyle(fontSize:16),),
-                                        color: AppColors.tertiary,
-                                        splashColor: AppColors.primary,
-                                      ),
-                                    ],
+                              Column(
+                                children: [
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('${DateFormat('hh:mm a').format(widget.post.data['eventDateTime'].toDate())}',style: TextStyle(fontWeight:FontWeight.w600,fontSize: 18),)
                                   ),
-                                ),
-                              )
+                                  Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text('${DateFormat('EEE, d MMMM yyyy').format(widget.post.data['eventDateTime'].toDate())}',style: TextStyle(fontWeight:FontWeight.w400,fontSize: 14),)
+                                  ),
+                                ],
+                              ),
                             ],
                           )
                         ),
@@ -268,99 +254,7 @@ class _DetailPageState extends State<DetailPage> {
               ),
               Divider(color:AppColors.secondary,height: 10,thickness: 2,),
               SizedBox(height:15),
-              Text('${widget.post.data['eventAddress']}',style: TextStyle(fontSize: 18),),
-              SizedBox(height:20),
-              Align(
-                child: Text('Event Dashboard',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
-                alignment: Alignment.centerLeft,
-              ),
-              Divider(color:AppColors.secondary,height: 10,thickness: 2,),
-              SizedBox(height:10),              
-              Material(
-                elevation: 8.0,
-                borderRadius: BorderRadius.circular(12.0),
-                shadowColor: AppColors.secondary,
-                child:InkWell(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context){return PassesAlotted(widget.post.data['eventCode']);}));
-                  },
-                  child:
-                    Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('Joined Guests', style: TextStyle(color: AppColors.primary)),
-                              Text('${NumberFormat.compact().format(widget.post.data['joined'])} / ${NumberFormat.compact().format(widget.post.data['maxAttendee'])}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 30.0))
-                            ],
-                          ),
-                          Material(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(24.0),
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Icon(Icons.people, color: Colors.white, size: 30.0),
-                              )
-                            )
-                          )
-                        ]
-                      ),
-                    ),
-                ),
-              ),
-              SizedBox(height:10), 
-              Material(
-                elevation: 8.0,
-                borderRadius: BorderRadius.circular(12.0),
-                shadowColor: AppColors.secondary,
-                child:InkWell(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context){return ScannedList(widget.post.data['eventCode']);}));
-                  },
-                  child:
-                    Padding(
-                      padding: const EdgeInsets.all(24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('Scanned Passes', style: TextStyle(color: AppColors.primary)),
-                              StreamBuilder<DocumentSnapshot>(
-                                stream: Firestore.instance.collection('events').document(widget.post.data['eventCode']).snapshots(),
-                                builder: (context, snapshot) {
-                                  if(snapshot.connectionState==ConnectionState.waiting)
-                                    return Text('Loading..', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 30.0));
-                                  else
-                                  return Text('${NumberFormat.compact().format(snapshot.data['scanDone'])}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 30.0));
-                                }
-                              )
-                            ],
-                          ),
-                          Material(
-                            color: AppColors.primary,
-                            borderRadius: BorderRadius.circular(24.0),
-                            child: Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Icon(Icons.confirmation_number, color: Colors.white, size: 30.0),
-                              )
-                            )
-                          )
-                        ]
-                      ),
-                    ),
-                ),
-              ),
+              Text('${widget.post.data['eventAddress']}',style: TextStyle(fontSize: 18),),            
               SizedBox(height:30),
               Align(
                 child: Text('Event Description',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
@@ -383,7 +277,7 @@ class _DetailPageState extends State<DetailPage> {
             ],
           ),
         )
-      ):page==1?Dashboard():page==2?ScanPass(widget.post.data['eventCode']):page==3?TeamPage(widget.post.data['eventCode'],isTeam):Announcements(widget.post.data['eventCode'], true)
+      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode']):page==3?TeamPage(widget.post.data['eventCode'],isTeam):Announcements(widget.post.data['eventCode'], true)
     );
   }
 }
