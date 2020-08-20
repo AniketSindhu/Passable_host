@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_icons/flutter_icons.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:lottie/lottie.dart';
 import 'package:passable_host/HomePage.dart';
@@ -45,6 +47,7 @@ class _CreateEventState extends State<CreateEvent> {
   PickResult mainResult;
   GeoFirePoint myLocation ;
   DateTime dateTime;
+  Completer<maps.GoogleMapController> _controller = Completer();
   final picker = ImagePicker();
   final hostNameController=TextEditingController();
   final hostEmailController=TextEditingController();
@@ -54,6 +57,7 @@ class _CreateEventState extends State<CreateEvent> {
   final eventAddController=TextEditingController();
   final maxAttendeeController=TextEditingController();
   String selectedCategory;
+  bool isOnline=false;
   List<DropdownMenuItem> categoryList=[
     DropdownMenuItem(
       child: Text('Appearance/Singing',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),),
@@ -118,6 +122,19 @@ class _CreateEventState extends State<CreateEvent> {
       }
     });
   }
+  onEventSelect(int x){
+    if(x==0)
+    setState(() {
+      isOnline=false;
+    });
+    else
+    setState(() {
+      isOnline=true;
+      mainResult=null;
+    });
+
+    print(isOnline);
+  }
   void _validateInputs() {
     if (_formKey.currentState.validate()) {
       if (hostPhoneNumber== null) {
@@ -147,11 +164,11 @@ class _CreateEventState extends State<CreateEvent> {
    context,
     MaterialPageRoute(
       builder: (context) => PlacePicker(
-
-        apiKey:  FlutterConfig.get('MAP_API'), 
+        //apiKey:  FlutterConfig.get('MAP_API'), 
         onPlacePicked: (result) { 
          setState(() {
           mainResult=result;
+          eventAddController.text=mainResult.formattedAddress;
           myLocation = geo.point(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng);
          }); 
            Navigator.of(context).pop();
@@ -160,7 +177,15 @@ class _CreateEventState extends State<CreateEvent> {
          useCurrentLocation: true,
        ),
      ),
-  );
+  ).then((value) async{
+    final maps.GoogleMapController controller = await _controller.future;
+    controller.animateCamera(maps.CameraUpdate.newCameraPosition(
+      maps.CameraPosition(
+        target:maps.LatLng(myLocation.latitude,myLocation.longitude),
+        zoom: 15.4746
+      )
+    ));
+  });
 }
                     
   @override
@@ -334,8 +359,103 @@ class _CreateEventState extends State<CreateEvent> {
                       'Help people in the area discover your event and let attendees know where to show up.',
                       style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
                   ),
-                  EventCreateTextField(
-                    maxLines:3,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      InkWell(
+                        onTap: (){
+                          onEventSelect(0);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration( 
+                            borderRadius: BorderRadius.circular(10),
+                            border:Border.all(width: 0.8,color: AppColors.primary),
+                            color: isOnline?Colors.white:AppColors.tertiary.withOpacity(1),
+                          ),
+                          
+                          child:Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Center(child: Text('Offline event',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),)),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width:20),
+                      InkWell(
+                        onTap: (){
+                          onEventSelect(1);
+                        },
+                        child: Container(
+                          decoration: BoxDecoration( 
+                            borderRadius: BorderRadius.circular(10),
+                            border:Border.all(width: 0.8,color: AppColors.primary),
+                            color: !isOnline?Colors.white:AppColors.tertiary.withOpacity(1),
+                          ),   
+                          child:Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Center(child: Text('Online event',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary))),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height:20),
+                 !isOnline&&mainResult==null?RaisedButton(
+                    onPressed:()=>showPlacePicker(),
+                    elevation: 3,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(FontAwesome.location_arrow,color: AppColors.secondary,),
+                        SizedBox(width: 5,),
+                        Text('Locate on map',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: Colors.white)),
+                      ],
+                    ),
+                    color: AppColors.primary,
+                    splashColor: AppColors.secondary,
+                  )
+                  :!isOnline&&mainResult!=null?Container(
+                    height: 200,
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: maps.GoogleMap(
+                            onMapCreated: (maps.GoogleMapController controller) {
+                              _controller.complete(controller);
+                            },
+                            markers: {
+                              maps.Marker(
+                                markerId: maps.MarkerId('marker'),
+                                position:maps.LatLng(myLocation.latitude,myLocation.longitude) ,
+                              )
+                            },            
+                            initialCameraPosition: maps.CameraPosition(
+                              target:maps.LatLng(myLocation.latitude,myLocation.longitude),
+                              zoom: 15.4746
+                            ),
+                            mapType: maps.MapType.normal,
+                          ),
+                        ),
+                        Container(
+                          width: double.infinity,
+                          child: RaisedButton(
+                            color:AppColors.primary ,
+                            splashColor: AppColors.tertiary,
+                            child: Icon(FontAwesome.edit,color:Colors.white),
+                            onPressed:(){
+                              showPlacePicker();
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  ):
+                  Text(
+                    'No location is required in online events, you can share the streaming/joining link using the announcement feature',
+                    style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)
+                  ),              
+                  mainResult!=null?SizedBox(height:20):Container(),
+                  mainResult!=null?EventCreateTextField(
+                    maxLines:1,
                     number:false,
                     width:0.5,
                     radius: 5,
@@ -346,8 +466,24 @@ class _CreateEventState extends State<CreateEvent> {
                     onSaved: (input){
                       eventAddress=input;
                     },  
+                  ):Container(),
+                  SizedBox(height:10),
+                  Divider(thickness:1),
+                  SizedBox(height:8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.only(top:8),
+                      child: Text('Date & Time',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+                    ),
                   ),
-                  SizedBox(height:20),
+                  Padding(
+                    padding: const EdgeInsets.only(top:2,bottom:12),
+                    child: Text(
+                      'Tell guests when your event starts so they can make plans to attend.',
+                      style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
+                  ),
+
                   FormField(
                     validator: (value)=>dateTime==null?"*Date & time are neccessary":null,
                     builder:(datecontext){
@@ -395,37 +531,7 @@ class _CreateEventState extends State<CreateEvent> {
                         );
                     },
                   ),
-                  SizedBox(height:20),
-                  FormField(
-                    validator: (value)=>myLocation==null?"*Date & time are neccessary":null,
-                    builder: (context){
-                    return mainResult==null?
-                      Container(
-                        child: FlatButton(
-                          color: Colors.red[300],
-                          onPressed: (){
-                            showPlacePicker();
-                          },
-                      child: Text('Locate Event Address',style: TextStyle(color:Colors.white,fontWeight:FontWeight.w500,fontSize:17),))
-                      ):
-                      Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text('${mainResult.formattedAddress}',style: TextStyle(color:Colors.cyan,fontWeight:FontWeight.w500,fontSize:16,fontStyle: FontStyle.italic),textAlign:TextAlign.center,),
-                          ),
-                          SizedBox(height:10),
-                          FlatButton(
-                            color: Colors.red[300],
-                            onPressed: (){
-                              showPlacePicker();
-                            },
-                          child: Text('Change Location',style: TextStyle(color:Colors.white,fontWeight:FontWeight.w500,fontSize:17),))                        
-                        ],
-                      );
-                    },
-                  ),
-                  SizedBox(height:13),                
+                  SizedBox(height:20),                
                   FormField(
                     validator:(value)=>_image==null?'*Must upload a photo':null,
                     onSaved:(input){imageDone=true;},
