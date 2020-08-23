@@ -151,7 +151,7 @@ class _TeamPageState extends State<TeamPage> {
                             backgroundColor: AppColors.tertiary,
                             builder: (BuildContext bc){
                               return Container(
-                                height: MediaQuery.of(context).size.height/1.8,
+                                height: MediaQuery.of(context).size.height/1.5,
                                 padding: EdgeInsets.only(
                                   bottom: MediaQuery.of(context).viewInsets.bottom,
                                   left: 20,
@@ -242,7 +242,7 @@ class _TeamPageState extends State<TeamPage> {
                             backgroundColor: AppColors.tertiary,
                             builder: (BuildContext bc){
                               return Container(
-                                height: MediaQuery.of(context).size.height/1.8,
+                                height: MediaQuery.of(context).size.height/1.5,
                                 padding: EdgeInsets.only(
                                   bottom: MediaQuery.of(context).viewInsets.bottom,
                                   left: 20,

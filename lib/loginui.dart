@@ -66,7 +66,7 @@ class _LoginState extends State<Login> {
       MobileLogin(){
         _scaffoldKey.currentState.showBottomSheet((BuildContext context) {
           return Container(
-            height: MediaQuery.of(context).size.height*0.35,
+            height: MediaQuery.of(context).size.height*0.43,
             child: ClipRRect(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(50),

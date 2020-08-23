@@ -43,12 +43,10 @@ class _CreateEventState extends State<CreateEvent> {
   String isoCode;
   int maxAttendees;
   bool imageDone=false;
-  File _image;
   PickResult mainResult;
   GeoFirePoint myLocation ;
   DateTime dateTime;
   Completer<maps.GoogleMapController> _controller = Completer();
-  final picker = ImagePicker();
   final hostNameController=TextEditingController();
   final hostEmailController=TextEditingController();
   final hostPhoneController=TextEditingController();
@@ -56,6 +54,7 @@ class _CreateEventState extends State<CreateEvent> {
   final descriptionController=TextEditingController();
   final eventAddController=TextEditingController();
   final maxAttendeeController=TextEditingController();
+  final dateTimeController=TextEditingController();
   String selectedCategory;
   bool isOnline=false;
   List<DropdownMenuItem> categoryList=[
@@ -141,13 +140,37 @@ class _CreateEventState extends State<CreateEvent> {
         Fluttertoast.showToast(
           msg:'Phone number is not valid :( ',
           backgroundColor: Colors.red,
-          fontSize: 18 
+          fontSize: 18,
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP
+        );
+      }
+      else if(dateTime==null){
+        Fluttertoast.showToast(
+          msg:'Date and Time is not valid ',
+          backgroundColor: Colors.red,
+          fontSize: 18,
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP
+        );
+      }
+      else if(mainResult==null&&!isOnline){
+        Fluttertoast.showToast(
+          msg:'Locate the event location',
+          backgroundColor: Colors.red,
+          fontSize: 18,
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP
         );
       }
       else{
       _formKey.currentState.save();
       eventCode=randomAlphaNumeric(6);
-      Navigator.push(context, MaterialPageRoute(builder: (context){return MaxGuests(eventName, eventCode, eventDescription, eventAddress,_image,dateTime, widget.uid,myLocation);}));
+      print(eventCode);
+      //--------->navigation here <---------
       FocusScopeNode currentFocus = FocusScope.of(context);
       if (!currentFocus.hasPrimaryFocus) {
         currentFocus.unfocus();
@@ -164,7 +187,7 @@ class _CreateEventState extends State<CreateEvent> {
    context,
     MaterialPageRoute(
       builder: (context) => PlacePicker(
-        //apiKey:  FlutterConfig.get('MAP_API'), 
+        apiKey:  'AIzaSyAJBaI8jdFjekZnRgtJ10DsNVF3RuSfXfc', 
         onPlacePicked: (result) { 
          setState(() {
           mainResult=result;
@@ -187,7 +210,18 @@ class _CreateEventState extends State<CreateEvent> {
     ));
   });
 }
-                    
+Future<Null> _selectDate(BuildContext context) async {
+  final DateTime picked = await DatePicker.showDateTimePicker(context,
+    showTitleActions: true,
+    minTime: DateTime.now(),
+    maxTime: DateTime.now().add(new Duration(days: 365))
+  );
+  if (picked != null && picked != dateTime)
+    setState(() {
+      dateTime= picked;
+      dateTimeController.text = DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime);
+    });
+}               
   @override
   Widget build(BuildContext context) {
     double height=SizeConfig.getHeight(context);
@@ -460,7 +494,7 @@ class _CreateEventState extends State<CreateEvent> {
                     width:0.5,
                     radius: 5,
                     controller: eventAddController,
-                    validator: (value) => value.length<2?'*must be 2 character long':null,
+                    validator: (value) => value.length<10?'*must be 10 character long':null,
                     hint: "Event Address",
                     icon: Icon(Icons.near_me,color:AppColors.secondary,),
                     onSaved: (input){
@@ -483,97 +517,26 @@ class _CreateEventState extends State<CreateEvent> {
                       'Tell guests when your event starts so they can make plans to attend.',
                       style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
                   ),
-
-                  FormField(
-                    validator: (value)=>dateTime==null?"*Date & time are neccessary":null,
-                    builder:(datecontext){
-                      return dateTime==null?FlatButton(
-                        shape: RoundedRectangleBorder(
-                          borderRadius:BorderRadius.circular(6)
-                        ),
-                        color: AppColors.secondary,
-                        onPressed: () {
-                          DatePicker.showDateTimePicker(context,
-                            showTitleActions: true,
-                            minTime: DateTime.now(),
-                            maxTime: DateTime.now().add(new Duration(days: 365)) ,onChanged: (date) {
-                             setState(() {
-                               dateTime=date;
-                             }); 
-                            }, onConfirm: (date) {
-                                setState(() {
-                                  dateTime=date;
-                                }); 
-                            }, currentTime: DateTime.now(), locale: LocaleType.en);
-                        },
-                      child: Text(
-                        'Event Time & Date',
-                        style: TextStyle(color: AppColors.primary,fontSize:20,fontWeight: FontWeight.w700,),
-                      )):
-                      Container(
-                        child: OutlineButton(
-                          borderSide: BorderSide(color:AppColors.secondary,width:3),
-                          onPressed: (){
-                          DatePicker.showDateTimePicker(context,
-                            showTitleActions: true,
-                            minTime: DateTime.now(),
-                            maxTime: DateTime.now().add(new Duration(days: 365)) ,onChanged: (date) {
-                             setState(() {
-                               dateTime=date;
-                             }); 
-                            }, onConfirm: (date) {
-                             setState(() {
-                               dateTime=date;
-                             }); 
-                            }, currentTime: DateTime.now(), locale: LocaleType.en);                          
-                          },
-                          child: Text('${DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime)}',style: TextStyle(color:AppColors.primary,fontWeight:FontWeight.w500,fontSize:20),))
-                        );
-                    },
+                  GestureDetector(
+                    onTap: () => _selectDate(context),
+                    child: AbsorbPointer(
+                      child: EventCreateTextField(
+                       maxLines:1,
+                       number:false,
+                       width:0.5,
+                       radius: 5,
+                       controller: dateTimeController,
+                       validator: (value) => null,
+                       hint: "Event Date & Time",
+                       icon: Icon(FontAwesome.calendar,color:AppColors.secondary,),
+                      )
+                    ),
                   ),
-                  SizedBox(height:20),                
-                  FormField(
-                    validator:(value)=>_image==null?'*Must upload a photo':null,
-                    onSaved:(input){imageDone=true;},
-                    builder: (context){
-                    return _image==null?Column(
-                      children: <Widget>[
-                        Container(
-                          height: 80,
-                          width: 80,
-                          child: IconButton(
-                            icon: Icon(Icons.image,size:60,color: AppColors.secondary,),
-                            onPressed:()async{
-                              final pickedFile = await picker.getImage(source: ImageSource.gallery);
-                              setState(() {
-                                _image = File(pickedFile.path);
-                              });
-                            }
-                          ),
-                        ),
-                        Text('Upload event poster (vertical)',style: TextStyle(color:AppColors.primary,fontSize:20,fontWeight: FontWeight.w700),)
-                      ],
-                    ):
-                    Column(
-                      children: <Widget>[
-                        Center(child: Image.file(_image,fit: BoxFit.contain,width:width*0.8,)),
-                        SizedBox(height:10),
-                        OutlineButton(
-                          borderSide: BorderSide(color:AppColors.secondary,width:3),
-                          onPressed:() async{
-                            final pickedFile = await picker.getImage(source: ImageSource.gallery);
-                            setState(() {
-                              _image = File(pickedFile.path);
-                            });                          
-                          },
-                          child: Text("Change banner?",style: TextStyle(color:AppColors.primary,fontWeight:FontWeight.w500,fontSize:20,fontStyle: FontStyle.italic),),
-                        ),
-                      ],
-                    );
-                  }),
                 ],
               )
             ),
+            SizedBox(height:10),
+            Divider(thickness:1),
             SizedBox(height:20),
             Align(
               child: Padding(
@@ -582,8 +545,18 @@ class _CreateEventState extends State<CreateEvent> {
                   onPressed:(){
                     _validateInputs();
                   },
-                  child: Text('Create event',style: TextStyle(fontSize:20),),
-                  color: AppColors.tertiary,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Continue',style: TextStyle(fontSize:22,fontWeight: FontWeight.w900,color: Colors.white,)),
+                        SizedBox(width:10),
+                        Icon(FontAwesome.arrow_right,color: Colors.white,size:16)
+                      ],
+                    ),
+                  ),
+                  color:AppColors.primary,
                    ),
               ),
             )
