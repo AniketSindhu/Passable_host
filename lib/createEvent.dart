@@ -170,7 +170,23 @@ class _CreateEventState extends State<CreateEvent> {
       _formKey.currentState.save();
       eventCode=randomAlphaNumeric(6);
       print(eventCode);
-      //--------->navigation here <---------
+      Navigator.push(context, MaterialPageRoute(
+        builder:(context){
+          return PosterSelect(
+            eventName: nameController.text,
+            eventDescription:descriptionController.text,
+            eventCategory: selectedCategory,
+            hostName: hostNameController.text,
+            hostEmail: hostEmailController.text,
+            hostPhoneNumber: hostPhoneNumber,
+            isOnline: isOnline,
+            location: myLocation,
+            eventAddress: eventAddController.text,
+            eventDateTime: dateTime,
+            eventCode: eventCode,
+          );
+        }
+      ));
       FocusScopeNode currentFocus = FocusScope.of(context);
       if (!currentFocus.hasPrimaryFocus) {
         currentFocus.unfocus();
@@ -566,6 +582,190 @@ Future<Null> _selectDate(BuildContext context) async {
     );
   }
 }
+
+class PosterSelect extends StatefulWidget {
+final String eventName;
+final String eventDescription;
+final String eventCategory;
+final String hostName;
+final String hostEmail;
+final String hostPhoneNumber;
+final String eventAddress;
+final String eventCode;
+final bool isOnline;
+final DateTime eventDateTime;
+final GeoFirePoint location;
+PosterSelect({this.eventName,this.eventDescription,this.eventCategory,this.hostName,this.hostEmail,this.hostPhoneNumber,this.isOnline,this.location,this.eventAddress,this.eventDateTime,this.eventCode});
+  @override
+  _PosterSelectState createState() => _PosterSelectState();
+}
+
+class _PosterSelectState extends State<PosterSelect> {
+  @override
+  void initState(){
+    super.initState();
+    print(widget.eventCategory);
+    print(widget.eventDateTime);
+    print(widget.eventDescription);
+    print(widget.eventName);
+    print(widget.hostEmail);
+    print(widget.hostName);
+    print(widget.hostPhoneNumber);
+    print(widget.isOnline);
+    print(widget.eventAddress);
+  }
+  File _image;
+  final picker = ImagePicker();
+
+    Future getImage() async {
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    setState(() {
+      _image = File(pickedFile.path);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    double height=SizeConfig.getHeight(context);
+    double width=SizeConfig.getWidth(context);
+    return Scaffold(
+      appBar: AppBar(
+        title:Text('Add Poster',style: GoogleFonts.cabin(fontWeight:FontWeight.w600,fontSize: 25)),
+        centerTitle: true,
+      ),
+      floatingActionButton: _image!=null?FloatingActionButton(
+        child:Icon(Icons.navigate_next,color:Colors.white,size:30),
+        backgroundColor: AppColors.secondary,
+        splashColor: AppColors.tertiary,
+        onPressed: (){
+          if(_image== null){
+            Fluttertoast.showToast(
+              msg:'Select a photo',
+              backgroundColor: Colors.red,
+              fontSize: 18,
+              textColor: Colors.white,
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.TOP
+            );
+          }
+          else
+            Navigator.push(context, MaterialPageRoute(
+              builder: (context){
+                return TicketInfo(
+                  eventName: widget.eventName,
+                  eventDescription: widget.eventDescription,
+                  eventCategory: widget.eventCategory,
+                  eventAddress: widget.eventAddress,
+                  location: widget.location,
+                  hostName: widget.hostName,
+                  hostEmail: widget.hostEmail,
+                  hostPhoneNumber: widget.hostPhoneNumber,
+                  eventDateTime: widget.eventDateTime,
+                  isOnline: widget.isOnline,
+                  image: _image,
+                  eventCode: widget.eventCode
+                );
+              }
+            )
+          );
+        },
+      ):Container(),
+      body: SingleChildScrollView(
+        child: Container(
+          margin: EdgeInsets.only(left:width/20,right:width/20,bottom: height/40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children:<Widget>[
+              Padding(
+                padding: const EdgeInsets.only(top:20),
+                child: Text('Event Poster',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top:2,bottom:12),
+                child: Text(
+                  'This is the first image people will see at the top of your listing. Vertical poster is recommended.',
+                  style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:16,color: Color(0xff39364f),)),
+              ),
+              SizedBox(height: 10,),
+              _image==null?InkWell(
+                onTap: ()=>getImage(),
+                child: Container(
+                  color: Colors.purple[50].withOpacity(0.7),
+                  height: height/2,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:<Widget>[
+                          Icon(FontAwesome.image,size: 50,),
+                          SizedBox(height:15),
+                          Text('Select poster image from gallery.',style: GoogleFonts.cabin(fontWeight:FontWeight.w400,fontSize:26,color: Color(0xff1E0A3C),),textAlign:TextAlign.center,),
+                          SizedBox(height:10),
+                          Text('Vertical image is recommended.',style: GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:22,color: Colors.purple[200]),textAlign:TextAlign.center,),
+                        ]
+                      ),
+                    ),
+                  ),
+                ),
+              ):Center(
+                child: InkWell(
+                  child: Image.file(_image,height: height/1.5,),
+                  onTap: ()=>getImage(),
+                ),
+              )
+            ]
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class TicketInfo extends StatefulWidget {
+  final String eventName;
+  final String eventDescription;
+  final String eventCategory;
+  final String hostName;
+  final String hostEmail;
+  final String hostPhoneNumber;
+  final String eventAddress;
+  final String eventCode;
+  final bool isOnline;
+  final DateTime eventDateTime;
+  final GeoFirePoint location;
+  final File image;
+  TicketInfo({this.eventName,this.eventDescription,this.eventCategory,this.hostName,this.hostEmail,this.hostPhoneNumber,this.isOnline,this.location,this.eventAddress,this.eventDateTime,this.eventCode,this.image});
+  @override
+  _TicketInfoState createState() => _TicketInfoState();
+}
+
+class _TicketInfoState extends State<TicketInfo> {
+  @override
+  Widget build(BuildContext context) {
+    double height= SizeConfig.getHeight(context);
+    double width= SizeConfig.getWidth(context);
+    return Scaffold(
+      appBar: AppBar(
+        title:Text('Ticket Info',style: GoogleFonts.cabin(fontWeight:FontWeight.w600,fontSize: 25)),
+        centerTitle: true,
+      ),
+      body: Container(
+        margin:EdgeInsets.symmetric(horizontal: width/20),
+        child: ListView(
+          children:<Widget>[
+            Padding(
+              padding: const EdgeInsets.only(top:20),
+              child: Text('Event Protection',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
 class CongoScreen extends StatefulWidget {
   final String eventCode;
   final String eventName;
@@ -685,184 +885,6 @@ class _CongoScreenState extends State<CongoScreen> {
   }
 }
 
-class MaxGuests extends StatefulWidget {
-  final String eventName;
-  final String eventDescription;
-  final String eventAddress;
-  final String eventCode;
-  final File image;
-  final DateTime dateTime;
-  final String uid;
-  final GeoFirePoint myLocation;
-  MaxGuests(this.eventName,this.eventCode,this.eventDescription,this.eventAddress,this.image,this.dateTime,this.uid,this.myLocation);
-  @override
-  _MaxGuestsState createState() => _MaxGuestsState();
-}
-
-class _MaxGuestsState extends State<MaxGuests> {
-  int maxAttendees;
-  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
-  FirebaseUser _user;
-  Razorpay _razorpay;
-  double amount;
-  int pay;
-  TextEditingController maxAttendeeController=TextEditingController();
-
-  void submit(){
-    FirebaseAdd().addEvent(widget.eventName, widget.eventCode, widget.eventDescription, widget.eventAddress, maxAttendees,widget.image,widget.dateTime, widget.uid,widget.myLocation);
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CongoScreen(widget.eventName,widget.eventCode,widget.eventAddress,widget.image,widget.dateTime)));
-  }
-
-  calcAmount(){
-    if(maxAttendees<=50)
-      setState(() {
-        amount=0;
-        pay=0;
-      });
-    else if(maxAttendees>50)
-      setState(() {
-        amount=149;
-        pay=15900;
-      });
-  }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    Fluttertoast.showToast(
-      msg: "SUCCESS: " + response.paymentId,
-      backgroundColor: Colors.green,
-    );
-    submit();
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    Fluttertoast.showToast(
-        backgroundColor: Colors.red,
-        msg: "ERROR: " + response.code.toString() + " - " + response.message,
-        );
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    Fluttertoast.showToast(
-        backgroundColor: Colors.redAccent,
-        msg: "EXTERNAL_WALLET: " + response.walletName,);
-  }
-
-  getCurrentUser() async {
-    _user = await _firebaseAuth.currentUser();
-   }
-   
-  @override
-  void initState() {
-    super.initState();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    getCurrentUser();
-  }
-  @override
-  void dispose() {
-    super.dispose();
-    _razorpay.clear();
-  }
-  void openCheckout() async {
-    if(maxAttendees<=0)
-      {
-        Fluttertoast.showToast(
-        backgroundColor: Colors.red,
-        msg: 'Max guests must be greater than 0');
-      }
-    else if(maxAttendees<=50 && maxAttendees>0)
-      {
-        submit();
-      }
-    else{
-    var options = {
-      //'key':'rzp_test_df25oDEIBVWDyE',
-      'key': FlutterConfig.get('Razor_Pay'),
-      'amount': pay,
-      'name': '${widget.eventName}',
-      'description': 'On ${DateFormat('dd-MM-yyyy AT hh:mm a').format(widget.dateTime)}',
-      'prefill': {'contact': '${_user.displayName}', 'email': '${_user.email==null?'':_user.email}'},
-    };
-    try {
-      _razorpay.open(options);
-    } catch (e) {
-      debugPrint(e);
-    }}
-}
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar:AppBar(title:Text('Create Event')),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Lottie.asset('assets/payment.json'),
-            ),
-            SizedBox(height:10),
-              CustomTextField(
-                maxLines:1,
-                number:true,
-                width:0.5,
-                radius: 5,
-                controller: maxAttendeeController,
-                validator: (value) => value.contains(new RegExp(r'^[0-9]*[1-9]+$|^[1-9]+[0-9]*$'))?null:'*more than 1 guest required',
-                hint: "Max number of guests",
-                icon: Icon(Icons.confirmation_number,color:AppColors.secondary,),
-                onChanged: (value){
-                  maxAttendees=int.parse(value);
-                  calcAmount();
-                },
-                onSaved: (input){
-                  setState(() {
-                    maxAttendees=int.parse(input);
-                    calcAmount();
-                  });                  
-                },  
-              ),
-            SizedBox(height:4),
-            Center(child: Text('*this value will not be able to change after event creation',style:TextStyle(color: Colors.redAccent))),
-            SizedBox(height:15),
-            Center(
-              child: RichText(
-                text:TextSpan(
-                  children:<TextSpan>[
-                    TextSpan(text:'Max Guests<50 = ',style: TextStyle(fontSize:15,fontWeight:FontWeight.w500,color: Colors.black)),
-                    TextSpan(text:'FREE',style: TextStyle(fontSize:17,fontWeight:FontWeight.w700,color: Colors.black)),
-                  ]
-                ) 
-              )
-            ),
-            SizedBox(height:5),
-            Center(
-              child: RichText(
-                text:TextSpan(
-                  children: <TextSpan>[
-                    TextSpan(text:'Max Guests>150 = ',style: TextStyle(fontSize:15,fontWeight:FontWeight.w500,color: Colors.black)),
-                    TextSpan(text:'₹199',style: TextStyle(fontSize:15,fontWeight:FontWeight.w600,decoration: TextDecoration.lineThrough,color:Colors.black)),
-                    TextSpan(text:' ₹149',style: TextStyle(fontSize:18,fontWeight:FontWeight.w700,color: Colors.black,)),
-                  ]
-                )
-              ),
-            ),
-            SizedBox(height:25),
-            Align(
-              child: RaisedButton(
-                color: AppColors.primary,
-                child: Text('${amount==0||amount==null?'FREE':'Pay ₹ $amount'}',style:GoogleFonts.montserrat(textStyle:TextStyle(color: Colors.white,fontWeight:FontWeight.w700,fontSize: 20))),
-                onPressed:(){
-                  openCheckout();
-                } 
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class EventCreateTextField extends StatelessWidget {
 
