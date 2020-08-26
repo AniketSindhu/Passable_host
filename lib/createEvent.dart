@@ -419,7 +419,7 @@ Future<Null> _selectDate(BuildContext context) async {
                         child: Container(
                           decoration: BoxDecoration( 
                             borderRadius: BorderRadius.circular(10),
-                            border:Border.all(width: 0.8,color: AppColors.primary),
+                            border:Border.all(width: 1.5,color: AppColors.primary),
                             color: isOnline?Colors.white:AppColors.tertiary.withOpacity(1),
                           ),
                           
@@ -437,7 +437,7 @@ Future<Null> _selectDate(BuildContext context) async {
                         child: Container(
                           decoration: BoxDecoration( 
                             borderRadius: BorderRadius.circular(10),
-                            border:Border.all(width: 0.8,color: AppColors.primary),
+                            border:Border.all(width: 1.5,color: AppColors.primary),
                             color: !isOnline?Colors.white:AppColors.tertiary.withOpacity(1),
                           ),   
                           child:Padding(
@@ -741,6 +741,36 @@ class TicketInfo extends StatefulWidget {
 }
 
 class _TicketInfoState extends State<TicketInfo> {
+  bool isProtected= false;
+  bool isPaid=true;
+  double ticketPrice=0;
+  int ticketCount=0;
+  TextEditingController ticketPriceController=TextEditingController();
+  TextEditingController ticketCountController=TextEditingController();
+  onPaidSelect(String x){
+    if(x=='yes')
+    setState(() {
+      isPaid=true;
+    });
+    else
+    setState(() {
+      isPaid=false;
+    });
+    print(isPaid);
+  }
+
+  onProtectSelect(String x){
+    if(x=='yes')
+    setState(() {
+      isProtected=true;
+    });
+    else
+    setState(() {
+      isProtected=false;
+    });
+    print(isProtected);
+  }
+
   @override
   Widget build(BuildContext context) {
     double height= SizeConfig.getHeight(context);
@@ -758,6 +788,191 @@ class _TicketInfoState extends State<TicketInfo> {
               padding: const EdgeInsets.only(top:20),
               child: Text('Event Protection',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
             ),
+            Padding(
+              padding: const EdgeInsets.only(top:2,bottom:12),
+              child: Text(
+                'Do you want your event to be protected by a code?, If yes then only people with that code can buy or redeem passes/ticket to this event. Select Yes if you want certain audience to come at your event',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: (){
+                    onProtectSelect('yes');
+                  },
+                  child: Container(
+                    width: 125,
+                    decoration: BoxDecoration( 
+                      borderRadius: BorderRadius.circular(10),
+                      border:Border.all(width: 1.5,color: AppColors.primary),
+                      color: !isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
+                    ),
+                    
+                    child:Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Center(child: Text('Yes',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),)),
+                    ),
+                  ),
+                ),
+                SizedBox(width:20),
+                InkWell(
+                  onTap: (){
+                    onProtectSelect('');
+                  },
+                  child: Container(
+                    width: 125,
+                    decoration: BoxDecoration( 
+                      borderRadius: BorderRadius.circular(10),
+                      border:Border.all(width: 1.5,color: AppColors.primary),
+                      color: isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
+                    ),   
+                    child:Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Center(child: Text('No',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary))),
+                    ),
+                  ),
+                ),    
+              ],
+            ),
+            SizedBox(height:10),
+            Divider(thickness:1),
+            SizedBox(height:8), 
+            Text('Ticket Info',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+            SizedBox(height:8),  
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: (){
+                    onPaidSelect('yes');
+                  },
+                  child: Container(
+                    width: 125,
+                    decoration: BoxDecoration( 
+                      borderRadius: BorderRadius.circular(10),
+                      border:Border.all(width: 1.5,color: AppColors.primary),
+                      color: !isPaid?Colors.white:AppColors.tertiary.withOpacity(1),
+                    ),
+                    child:Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Center(child: Text('Paid',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),)),
+                    ),
+                  ),
+                ),
+                SizedBox(width:20),
+                InkWell(
+                  onTap: (){
+                    onPaidSelect('');
+                  },
+                  child: Container(
+                    width: 125,
+                    decoration: BoxDecoration( 
+                      borderRadius: BorderRadius.circular(10),
+                      border:Border.all(width: 1.5,color: AppColors.primary),
+                      color: isPaid?Colors.white:AppColors.tertiary.withOpacity(1),
+                    ),   
+                    child:Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Center(child: Text('Free',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary))),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height:15),
+            isPaid?Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children:<Widget>[
+                Container(
+                  width: 150,
+                  child: TextField(
+                    controller: ticketPriceController,
+                    style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 16),
+                    onChanged: (value){
+                      setState(() {
+                        ticketPrice=double.parse(value);
+                      });
+                    },
+                    decoration: InputDecoration(
+                      labelText: 'Ticket Price',
+                      labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.secondary),
+                      prefixIcon: Icon(FontAwesome.rupee,color: AppColors.primary)
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                Expanded(child: Icon(FontAwesome.times,size: 30,)),
+                Container(
+                  width: 150,
+                  child: TextField(
+                    onChanged: (value){
+                      setState(() {
+                        ticketCount=int.parse(value);
+                      });
+                    },
+                    controller: ticketCountController,
+                    style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 16),
+                    decoration: InputDecoration(
+                      labelText: 'Ticket Count',
+                      labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.secondary),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+              ],
+            ):Container(),
+            isPaid?SizedBox(height:10):Container(),
+            isPaid?Padding(
+              padding: const EdgeInsets.only(top:20),
+              child: Row(
+                children: [
+                  Text('Gross Earning:',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:26,color: Color(0xff1E0A3C),)),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(FontAwesome.rupee,size:25,color: Color(0xff1E0A3C)),
+                        SizedBox(width: 5,),
+                        Text('${ticketPrice * ticketCount}',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:26,color:AppColors.primary ,))
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ):Container(),
+            isPaid?Text(
+              '(Ticket price * Ticket Count)',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w600,fontSize:17,color: Color(0xff39364f),)
+            ):Container(),
+            isPaid?Padding(
+              padding: const EdgeInsets.only(top:20),
+              child: Row(
+                children: [
+                  Text('Est. Earning:',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:26,color: Color(0xff1E0A3C))),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(FontAwesome.rupee,size:25,color: Color(0xff1E0A3C)),
+                        SizedBox(width: 5,),
+                        Text('${(ticketPrice * ticketCount)*92/100}',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:26,color: AppColors.primary,))
+                      ],
+                    ),
+                  )
+                ],
+              ),
+            ):Container(),
+            isPaid?Text(
+              '(Gross Earning - Passable fees 8%)',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w600,fontSize:17,color: Color(0xff39364f),)
+            ):Container(),
+            isPaid?SizedBox(height:5):Container(),
+            isPaid?Text(
+              '*This is the amount you will get in 24 hours after event completion',
+              style:GoogleFonts.cabin(fontWeight:FontWeight.w600,fontSize:18,color: Colors.red,)
+            ):Container(),
+            isPaid?SizedBox(height:20):Container()
           ],
         ),
       ),
