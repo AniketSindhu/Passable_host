@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,8 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'package:international_phone_input/international_phone_input.dart';
 import 'package:lottie/lottie.dart';
 import 'package:passable_host/HomePage.dart';
-import 'package:passable_host/Methods/firebaseAdd.dart';
 import 'package:passable_host/loginui.dart';
+import 'package:passable_host/methods/firebaseAdd.dart';
 import 'package:random_string/random_string.dart';
 import 'Widgets/clipper.dart';
 import 'config/config.dart';
@@ -747,6 +748,7 @@ class _TicketInfoState extends State<TicketInfo> {
   int ticketCount=0;
   TextEditingController ticketPriceController=TextEditingController();
   TextEditingController ticketCountController=TextEditingController();
+  TextEditingController passcodeController=TextEditingController();
   onPaidSelect(String x){
     if(x=='yes')
     setState(() {
@@ -755,6 +757,8 @@ class _TicketInfoState extends State<TicketInfo> {
     else
     setState(() {
       isPaid=false;
+      ticketPriceController.clear();
+      ticketPrice=0;
     });
     print(isPaid);
   }
@@ -771,6 +775,89 @@ class _TicketInfoState extends State<TicketInfo> {
     print(isProtected);
   }
 
+  void validateInputs () async{
+    if(ticketCount<=10){
+      Fluttertoast.showToast(
+        msg:'Ticket count must be greater than 10 ',
+        backgroundColor: Colors.red,
+        fontSize: 18,
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP
+      );
+    }
+    else if(ticketPrice<=20&&isPaid==true){
+      Fluttertoast.showToast(
+        msg:'Ticket Price must be greater than ₹20 ',
+        backgroundColor: Colors.red,
+        fontSize: 18,
+        textColor: Colors.white,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP
+      );   
+    }
+    else if(passcodeController.text.trim().length!=0&&passcodeController.text!=null&&passcodeController.text!=''){
+      final x= await Firestore.instance.collection('partners').document(passcodeController.text).get();
+      if(!x.exists){
+        Fluttertoast.showToast(
+          msg:'Invalid partner code added',
+          backgroundColor: Colors.red,
+          fontSize: 18,
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP
+        ); 
+      }
+      else{
+        await FirebaseAdd().addEvent(
+          widget.eventName,
+          widget.eventCode, 
+          widget.eventDescription, 
+          widget.eventAddress, 
+          ticketCount, 
+          widget.image, 
+          widget.eventDateTime, 
+          widget.location, 
+          widget.hostName, 
+          widget.hostEmail, 
+          widget.hostPhoneNumber, 
+          widget.eventCategory, 
+          widget.isOnline, 
+          isPaid, 
+          isProtected, 
+          ticketPrice, 
+          passcodeController.text
+        );
+        Navigator.push(context, MaterialPageRoute(builder: (context){
+          return CongoScreen(widget.eventName,widget.eventCode,widget.eventAddress,widget.image,widget.eventDateTime);
+        }));
+      }
+    }
+    else{
+        await FirebaseAdd().addEvent(
+          widget.eventName,
+          widget.eventCode, 
+          widget.eventDescription, 
+          widget.eventAddress, 
+          ticketCount, 
+          widget.image, 
+          widget.eventDateTime, 
+          widget.location, 
+          widget.hostName, 
+          widget.hostEmail, 
+          widget.hostPhoneNumber, 
+          widget.eventCategory, 
+          widget.isOnline, 
+          isPaid, 
+          isProtected, 
+          ticketPrice, 
+          null
+        );
+        Navigator.push(context, MaterialPageRoute(builder: (context){
+          return CongoScreen(widget.eventName,widget.eventCode,widget.eventAddress,widget.image,widget.eventDateTime);
+        }));
+    }
+  }
   @override
   Widget build(BuildContext context) {
     double height= SizeConfig.getHeight(context);
@@ -783,62 +870,11 @@ class _TicketInfoState extends State<TicketInfo> {
       body: Container(
         margin:EdgeInsets.symmetric(horizontal: width/20),
         child: ListView(
-          children:<Widget>[
+          children:<Widget>[ 
             Padding(
-              padding: const EdgeInsets.only(top:20),
-              child: Text('Event Protection',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+              padding: const EdgeInsets.only(top:20.0),
+              child: Text('Ticket Info',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
             ),
-            Padding(
-              padding: const EdgeInsets.only(top:2,bottom:12),
-              child: Text(
-                'Do you want your event to be protected by a code?, If yes then only people with that code can buy or redeem passes/ticket to this event. Select Yes if you want certain audience to come at your event',
-                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: (){
-                    onProtectSelect('yes');
-                  },
-                  child: Container(
-                    width: 125,
-                    decoration: BoxDecoration( 
-                      borderRadius: BorderRadius.circular(10),
-                      border:Border.all(width: 1.5,color: AppColors.primary),
-                      color: !isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
-                    ),
-                    
-                    child:Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Center(child: Text('Yes',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),)),
-                    ),
-                  ),
-                ),
-                SizedBox(width:20),
-                InkWell(
-                  onTap: (){
-                    onProtectSelect('');
-                  },
-                  child: Container(
-                    width: 125,
-                    decoration: BoxDecoration( 
-                      borderRadius: BorderRadius.circular(10),
-                      border:Border.all(width: 1.5,color: AppColors.primary),
-                      color: isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
-                    ),   
-                    child:Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Center(child: Text('No',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary))),
-                    ),
-                  ),
-                ),    
-              ],
-            ),
-            SizedBox(height:10),
-            Divider(thickness:1),
-            SizedBox(height:8), 
-            Text('Ticket Info',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
             SizedBox(height:8),  
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -889,14 +925,20 @@ class _TicketInfoState extends State<TicketInfo> {
                   child: TextField(
                     controller: ticketPriceController,
                     style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 16),
-                    onChanged: (value){
+                    onChanged: (val){
                       setState(() {
-                        ticketPrice=double.parse(value);
+                        if(val.trim().length==0)
+                          {
+                            ticketPrice=0;
+                          }
+                        else
+                        ticketPrice=double.parse(val);
                       });
                     },
                     decoration: InputDecoration(
                       labelText: 'Ticket Price',
                       labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.secondary),
+                      alignLabelWithHint: true,
                       prefixIcon: Icon(FontAwesome.rupee,color: AppColors.primary)
                     ),
                     keyboardType: TextInputType.number,
@@ -906,22 +948,47 @@ class _TicketInfoState extends State<TicketInfo> {
                 Container(
                   width: 150,
                   child: TextField(
-                    onChanged: (value){
+                    onChanged: (val){
                       setState(() {
-                        ticketCount=int.parse(value);
-                      });
+                        if(val.trim().length==0)
+                          {
+                            ticketCount=0;
+                          }
+                        else
+                        ticketCount=int.parse(val);
+                            });
                     },
                     controller: ticketCountController,
                     style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 16),
                     decoration: InputDecoration(
                       labelText: 'Ticket Count',
+                      alignLabelWithHint: true,
                       labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.secondary),
                     ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
               ],
-            ):Container(),
+            ):
+            EventCreateTextField(
+              maxLines:1,
+              number:true,
+              width:0.5,
+              radius: 5,
+              controller: ticketCountController,
+              hint: "Ticket Count",
+              icon: Icon(FontAwesome.calculator,color:AppColors.secondary,),
+              onChanged: (val){
+                setState(() {
+                  if(val.trim().length==0)
+                    {
+                      ticketCount=0;
+                    }
+                  else
+                  ticketCount=int.parse(val);
+                });
+              }, 
+            ),
             isPaid?SizedBox(height:10):Container(),
             isPaid?Padding(
               padding: const EdgeInsets.only(top:20),
@@ -972,7 +1039,105 @@ class _TicketInfoState extends State<TicketInfo> {
               '*This is the amount you will get in 24 hours after event completion',
               style:GoogleFonts.cabin(fontWeight:FontWeight.w600,fontSize:18,color: Colors.red,)
             ):Container(),
-            isPaid?SizedBox(height:20):Container()
+            isPaid?SizedBox(height:20):Container(),
+            SizedBox(height:10),
+            Divider(thickness:1),
+            SizedBox(height:8),
+            Text('Event Protection',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+            Padding(
+              padding: const EdgeInsets.only(top:2,bottom:12),
+              child: Text(
+                'Do you want your event to be protected by a code?, If yes then only people with that code can buy or redeem passes/ticket to this event. Select Yes if you want certain audience to come at your event',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                InkWell(
+                  onTap: (){
+                    onProtectSelect('yes');
+                  },
+                  child: Container(
+                    width: 125,
+                    decoration: BoxDecoration( 
+                      borderRadius: BorderRadius.circular(10),
+                      border:Border.all(width: 1.5,color: AppColors.primary),
+                      color: !isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
+                    ),
+                    
+                    child:Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Center(child: Text('Yes',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),)),
+                    ),
+                  ),
+                ),
+                SizedBox(width:20),
+                InkWell(
+                  onTap: (){
+                    onProtectSelect('');
+                  },
+                  child: Container(
+                    width: 125,
+                    decoration: BoxDecoration( 
+                      borderRadius: BorderRadius.circular(10),
+                      border:Border.all(width: 1.5,color: AppColors.primary),
+                      color: isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
+                    ),   
+                    child:Padding(
+                      padding: const EdgeInsets.all(15.0),
+                      child: Center(child: Text('No',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary))),
+                    ),
+                  ),
+                ), 
+              ],
+            ),
+            isPaid?SizedBox(height:10):Container(),
+            isPaid?Divider(thickness:1):Container(),
+            isPaid?SizedBox(height:8):Container(),
+            isPaid?Text('Partner code',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)):Container(),
+            isPaid?Padding(
+              padding: const EdgeInsets.only(top:2,bottom:12),
+              child: Text(
+                'If you are associated with a partner of passable enter his code, the fee will be split in 75:25 with the partner',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
+            ):Container(),
+            isPaid?EventCreateTextField(
+              maxLines:1,
+              number:false,
+              width:0.5,
+              radius: 5,
+              controller: passcodeController,
+              hint: "Enter code here",
+              icon: Icon(FontAwesome.keyboard_o,color:AppColors.secondary,),
+              onChanged: (val){
+              }, 
+            ):Container(),
+            SizedBox(height:10),
+            Divider(thickness:1),
+            SizedBox(height:8),
+            Align(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom:15.0),
+                child: RaisedButton(
+                  onPressed:(){
+                    validateInputs();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Create event',style: TextStyle(fontSize:22,fontWeight: FontWeight.w900,color: Colors.white,)),
+                        SizedBox(width:10),
+                        Icon(FontAwesome.arrow_right,color: Colors.white,size:16)
+                      ],
+                    ),
+                  ),
+                  color:AppColors.primary,
+                   ),
+              ),
+            ),
+            SizedBox(height:10)
           ],
         ),
       ),

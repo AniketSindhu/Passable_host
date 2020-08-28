@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_icons/flutter_icons.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -20,9 +21,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   var firestore=Firestore.instance;
   String uid;
+  int _selectedIndex = 0;
   void getUser() async{
     uid= await getCurrentUid();
     setState(() {  
+    });
+  }
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
   }
   @override
@@ -30,18 +37,35 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getUser();
   }
-  Future getEvents() async{
+  Future getEvents(int index) async{
     List<String>eventCodes=[];
     final QuerySnapshot result= await firestore.collection('users').document(uid).collection('eventsHosted').getDocuments();
     result.documents.forEach((element)=>eventCodes.add(element.data['eventCode']));
-    final QuerySnapshot hostedEventDetails=await firestore.collection('events').orderBy('eventDateTime',descending: false).where("eventCode",whereIn:eventCodes).getDocuments();
-    return hostedEventDetails.documents;
+    if(index==0){
+      final QuerySnapshot hostedEventDetails=await firestore.collection('events').orderBy('eventDateTime',descending: false).where("eventCode",whereIn:eventCodes).getDocuments();
+      return hostedEventDetails.documents;
+    }
+    else{
+      final QuerySnapshot hostedEventDetails=await firestore.collection('OnlineEvents').orderBy('eventDateTime',descending: false).where("eventCode",whereIn:eventCodes).getDocuments();
+      return hostedEventDetails.documents;
+    }
   }
   @override
   Widget build(BuildContext context) {
     double height=SizeConfig.getHeight(context);
     double width=SizeConfig.getWidth(context);
     return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: AppColors.primary,
+        items:<BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(FontAwesome.calendar),title: Text('Offline events',)),
+          BottomNavigationBarItem(icon: Icon(FontAwesome.laptop),title: Text('Online events',)),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        unselectedItemColor: Colors.white,
+        onTap: _onItemTapped,
+      ),
       floatingActionButton:FloatingActionButton.extended(
        backgroundColor: AppColors.tertiary,
        onPressed: (){
@@ -100,7 +124,7 @@ class _HomePageState extends State<HomePage> {
           ),
           uid!=null?
           FutureBuilder(
-            future: getEvents(),
+            future: getEvents(_selectedIndex),
             builder:(context,snapshot){
               if(snapshot.connectionState==ConnectionState.waiting)
               {
@@ -128,8 +152,30 @@ class _HomePageState extends State<HomePage> {
                   ],
                 );
               }
-              else
-              return Expanded(
+              else{
+                if(snapshot.data.length==0){
+                  return Column(
+                    children: [
+                      Container(
+                        width: width,              
+                        height: height/2,
+                        child: Center(
+                          child: Padding(
+                           padding: const EdgeInsets.all(16.0),
+                           child: SvgPicture.asset(
+                            'assets/event.svg',
+                            semanticsLabel: 'Event Illustration'
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height:height/20),
+                    Text("Nothing to show up here :(")
+                  ],
+                  );
+                }
+                else 
+                return Expanded(
                   child: ListView.builder(
                   itemCount: snapshot.data.length,
                   itemBuilder:(context,index){
@@ -137,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                   }
                 ),
               );
-          }):Expanded(child: Center(child: SpinKitChasingDots(color:AppColors.secondary,size:40))),
+          }}):Expanded(child: Center(child: SpinKitChasingDots(color:AppColors.secondary,size:40))),
         ],
       )
     );

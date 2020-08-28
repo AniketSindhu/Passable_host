@@ -78,11 +78,10 @@ class _DashboardState extends State<Dashboard> {
                         children: <Widget>[
                           Text('Scanned Passes', style: TextStyle(color: AppColors.primary)),
                           StreamBuilder<DocumentSnapshot>(
-                            stream: Firestore.instance.collection('events').document(widget.post.data['eventCode']).snapshots(),
+                            stream: widget.post.data['isOnline']?Firestore.instance.collection('OnlineEvents').document(widget.post.data['eventCode']).snapshots() :Firestore.instance.collection('events').document(widget.post.data['eventCode']).snapshots(),
                             builder: (context, snapshot) {
                               if(snapshot.connectionState==ConnectionState.waiting)
                                 return Text('Loading..', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 30.0));
-                              else
                               return Text('${NumberFormat.compact().format(snapshot.data['scanDone'])}', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700, fontSize: 30.0));
                             }
                           )
