@@ -16,7 +16,8 @@ import 'package:url_launcher/url_launcher.dart';
 class Announcements extends StatefulWidget {
   final bool isOwner;
   final String eventCode;
-  Announcements(this.eventCode,this.isOwner);
+  final bool isOnline;
+  Announcements(this.eventCode,this.isOwner,this.isOnline);
   @override
   _AnnouncementsState createState() => _AnnouncementsState();
 }
@@ -27,14 +28,14 @@ class _AnnouncementsState extends State<Announcements> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: widget.isOwner?FloatingActionButton.extended(
-        onPressed:()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateAnnouncement(widget.eventCode))),
+        onPressed:()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateAnnouncement(widget.eventCode,widget.isOnline))),
         icon: Icon(Icons.add,),
         backgroundColor: AppColors.tertiary,
         splashColor: AppColors.secondary,
         label: Text("Announce",style: GoogleFonts.roboto(textStyle:TextStyle(color: Colors.black,fontWeight:FontWeight.w600))),
       ):Container(),
       body: StreamBuilder(
-        stream: Firestore.instance.collection("events").document(widget.eventCode).collection("Announcements").orderBy('timestamp',descending: true).snapshots(),
+        stream: widget.isOnline?Firestore.instance.collection("OnlineEvents").document(widget.eventCode).collection("Announcements").orderBy('timestamp',descending: true).snapshots():Firestore.instance.collection("events").document(widget.eventCode).collection("Announcements").orderBy('timestamp',descending: true).snapshots(),
         builder:(context,snapshot){
           if(snapshot.connectionState==ConnectionState.waiting){
             return Center(
@@ -60,7 +61,7 @@ class _AnnouncementsState extends State<Announcements> {
                 child: ListView.builder(
                   itemCount: snapshot.data.documents.length,
                   itemBuilder:(context,index){
-                    return announceWidget(Announce.fromDocument(snapshot.data.documents[index]),widget.isOwner,widget.eventCode);
+                    return announceWidget(Announce.fromDocument(snapshot.data.documents[index]),widget.isOwner,widget.eventCode,widget.isOnline);
                   } 
                 ),
               );
@@ -71,7 +72,7 @@ class _AnnouncementsState extends State<Announcements> {
   }
 }
                 
-Widget announceWidget(Announce announce, bool isOwner,String eventCode){
+Widget announceWidget(Announce announce, bool isOwner,String eventCode,bool isOnline){
   return Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
@@ -89,8 +90,13 @@ Widget announceWidget(Announce announce, bool isOwner,String eventCode){
                 icon: Icon(Icons.more_vert),
                 onSelected: (val) async{
                   if(val==1)
-                    {
+                    { 
+                      if(isOnline){
+                        await Firestore.instance.collection('OnlineEvents').document(eventCode).collection('Announcements').document(announce.id).delete();
+                      }
+                      else{
                       await Firestore.instance.collection('events').document(eventCode).collection('Announcements').document(announce.id).delete();
+                      }
                     }
                 },
                 itemBuilder:(context){
@@ -148,7 +154,8 @@ Widget announceWidget(Announce announce, bool isOwner,String eventCode){
 
 class CreateAnnouncement extends StatefulWidget {
   final String eventCode;
-  CreateAnnouncement(this.eventCode);
+  final bool isOnline;
+  CreateAnnouncement(this.eventCode,this.isOnline);
   @override
   _CreateAnnouncementState createState() => _CreateAnnouncementState();
 }
@@ -168,7 +175,7 @@ class _CreateAnnouncementState extends State<CreateAnnouncement> {
           setState(() {
             uploading=true;
           });
-          FirebaseAdd().announce(widget.eventCode, descriptionController.text, _image).then((value){
+          FirebaseAdd().announce(widget.eventCode, descriptionController.text, _image,widget.isOnline).then((value){
               uploading=false;
               Navigator.pop(context);
             });

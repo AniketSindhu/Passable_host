@@ -247,14 +247,14 @@ class _DetailPageState extends State<DetailPage> {
                   ],
                 ),
               ),
-              SizedBox(height: 15,),
-              Align(
+              !widget.post.data['isOnline']?SizedBox(height: 15,):Container(),
+              !widget.post.data['isOnline']?Align(
                 child: Text('Address',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
                 alignment: Alignment.centerLeft,
-              ),
-              Divider(color:AppColors.secondary,height: 10,thickness: 2,),
-              SizedBox(height:15),
-              Text('${widget.post.data['eventAddress']}',style: TextStyle(fontSize: 18),),            
+              ):Container(),
+              !widget.post.data['isOnline']?Divider(color:AppColors.secondary,height: 10,thickness: 2,):Container(),
+              !widget.post.data['isOnline']?SizedBox(height:15):Container(),
+              !widget.post.data['isOnline']?Text('${widget.post.data['eventAddress']}',style: TextStyle(fontSize: 18),):Container(),            
               SizedBox(height:30),
               Align(
                 child: Text('Event Description',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
@@ -277,7 +277,7 @@ class _DetailPageState extends State<DetailPage> {
             ],
           ),
         )
-      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode']):page==3?TeamPage(widget.post.data['eventCode'],isTeam):Announcements(widget.post.data['eventCode'], true)
+      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode'],widget.post.data['isOnline']):page==3?TeamPage(widget.post.data['eventCode'],isTeam,widget.post.data['isOnline']):Announcements(widget.post.data['eventCode'], true,widget.post.data['isOnline'])
     );
   }
 }

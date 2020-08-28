@@ -7,23 +7,27 @@ import 'package:lottie/lottie.dart';
 
 class ScanPass extends StatefulWidget {
   final String eventCode;
-  ScanPass(this.eventCode);
+  final bool isOnline;
+  ScanPass(this.eventCode,this.isOnline);
   @override
   _ScanPassState createState() => _ScanPassState();
 }
 
 class _ScanPassState extends State<ScanPass> {
   void scanPass(BuildContext contextMain)async{
+    if(widget.isOnline){
+
+    }
     String res=await FlutterBarcodeScanner.scanBarcode("#ff6666", 'Stop Scan', true, ScanMode.QR);
-    final x=await Firestore.instance.collection('events').document(widget.eventCode).collection('guests').document(res).get();
+    final x=await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('guests').document(res).get();
     if(x.exists)
      {
        if(x.data['Scanned']==false)
         {
-          Firestore.instance.collection('events').document(widget.eventCode).collection('guests').document(res).updateData({'Scanned':true});
-          Firestore.instance.collection('events').document(widget.eventCode).get().then((value){
+          Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('guests').document(res).updateData({'Scanned':true});
+          Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).get().then((value){
             int counter=value.data['scanDone'];
-            Firestore.instance.collection('events').document(widget.eventCode).updateData({'scanDone':counter+1});
+            Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).updateData({'scanDone':counter+1});
             });
           showDialog(
             context:contextMain,

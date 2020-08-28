@@ -11,7 +11,8 @@ import 'package:passable_host/methods/getUserId.dart';
 class TeamPage extends StatefulWidget {
   final String eventCode;
   final bool isTeam;
-  TeamPage(this.eventCode,this.isTeam);
+  final bool isOnline;
+  TeamPage(this.eventCode,this.isTeam,this.isOnline);
   @override
   _TeamPageState createState() => _TeamPageState();
 }
@@ -19,12 +20,12 @@ class TeamPage extends StatefulWidget {
 class _TeamPageState extends State<TeamPage> {
   TextEditingController controller= TextEditingController();
   Future<List<DocumentSnapshot>> getTeamList() async{
-    final x= await Firestore.instance.collection('events').document(widget.eventCode).collection('team').getDocuments();
+    final x= await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').getDocuments();
     return x.documents;
   }
   removeMember(String removeUid) async{
     await Firestore.instance.collection('users').document(removeUid).collection('eventsHosted').document(widget.eventCode).delete();
-    await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(removeUid).delete();
+    await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(removeUid).delete();
     Fluttertoast.showToast(msg: 'Removed from the team',textColor: Colors.white,toastLength: Toast.LENGTH_SHORT,backgroundColor: Colors.green);
     setState(() {});
   }
@@ -42,7 +43,7 @@ class _TeamPageState extends State<TeamPage> {
     }
     else{
       if(x.documents.isNotEmpty&&y.documents.isEmpty){
-        final m=await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).get();
+        final m=await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).get();
         if(m.exists){
           Fluttertoast.showToast(msg: '${x.documents[0].data['name']} is already in your team',textColor: Colors.white,toastLength: Toast.LENGTH_SHORT,backgroundColor: Colors.red,gravity: ToastGravity.TOP);
         }
@@ -51,7 +52,7 @@ class _TeamPageState extends State<TeamPage> {
           'eventCode':widget.eventCode,
           'isTeam':true
         });
-        await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).setData({
+        await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).setData({
           'email':x.documents[0].data['email'],
           'name':x.documents[0].data['name'],
           'phoneNumber':x.documents[0].data['phoneNumber'],
@@ -62,7 +63,7 @@ class _TeamPageState extends State<TeamPage> {
         }
       }
       else if(y.documents.isNotEmpty&&x.documents.isEmpty){
-        final a=await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(y.documents[0].data['uid']).get();
+        final a=await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(y.documents[0].data['uid']).get();
         if(a.exists){
           Fluttertoast.showToast(msg: '${y.documents[0].data['name']} is already in your team',textColor: Colors.white,toastLength: Toast.LENGTH_SHORT,backgroundColor: Colors.red,gravity: ToastGravity.TOP);
         }
@@ -71,7 +72,7 @@ class _TeamPageState extends State<TeamPage> {
           'eventCode':widget.eventCode,
           'isTeam':true
         });
-        await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(y.documents[0].data['uid']).setData({
+        await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(y.documents[0].data['uid']).setData({
           'email':y.documents[0].data['email'],
           'name':y.documents[0].data['name'],
           'phoneNumber':y.documents[0].data['phoneNumber'],
@@ -82,7 +83,7 @@ class _TeamPageState extends State<TeamPage> {
         }
       }
       else{
-        final b=await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).get();
+        final b=await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).get();
         if(b.exists){
           Fluttertoast.showToast(msg: '${x.documents[0].data['name']} is already in your team',textColor: Colors.white,toastLength: Toast.LENGTH_SHORT,backgroundColor: Colors.red,gravity: ToastGravity.TOP);
         }
@@ -91,7 +92,7 @@ class _TeamPageState extends State<TeamPage> {
           'eventCode':widget.eventCode,
           'isTeam':true
         });
-        await Firestore.instance.collection('events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).setData({
+        await Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('team').document(x.documents[0].data['uid']).setData({
           'email':x.documents[0].data['email'],
           'name':x.documents[0].data['name'],
           'phoneNumber':x.documents[0].data['phoneNumber'],

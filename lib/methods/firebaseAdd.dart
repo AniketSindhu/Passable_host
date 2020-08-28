@@ -96,7 +96,7 @@ class FirebaseAdd{
   }
 }
 
-  Future<bool> announce(String eventCode,String description,File image) async{
+  Future<bool> announce(String eventCode,String description,File image,bool isOnline) async{
     String _uploadedFileURL;
     if(image!=null){
     StorageReference firebaseStorageRef =
@@ -109,6 +109,15 @@ class FirebaseAdd{
       });
     }
     String id=randomAlphaNumeric(8);
+    if(isOnline){
+      Firestore.instance.collection("OnlineEvents").document(eventCode).collection('Announcements').document(id).setData({
+      'description':description,
+      'media':_uploadedFileURL,
+      'timestamp':DateTime.now(),
+      'id':id
+    });
+    }
+    else
     Firestore.instance.collection("events").document(eventCode).collection('Announcements').document(id).setData({
       'description':description,
       'media':_uploadedFileURL,
