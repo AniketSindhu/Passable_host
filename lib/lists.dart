@@ -6,8 +6,10 @@ import 'package:lottie/lottie.dart';
 import 'config/config.dart';
 
 class PassesAlotted extends StatefulWidget {
+  final bool isOnline;
   final String eventCode;
-  PassesAlotted(this.eventCode);
+  final double price;
+  PassesAlotted(this.eventCode,this.isOnline,this.price);
   @override
   _PassesAlottedState createState() => _PassesAlottedState();
 }
@@ -16,8 +18,14 @@ class _PassesAlottedState extends State<PassesAlotted> {
   var firestore=Firestore.instance;
   Future<List<DocumentSnapshot>> users;
   Future getData()async{
-    final QuerySnapshot joinedGuests=await firestore.collection('events').document(widget.eventCode).collection('guests').getDocuments();
-    return joinedGuests.documents;
+    if(!widget.isOnline){
+      final QuerySnapshot joinedGuests=await firestore.collection('events').document(widget.eventCode).collection('guests').getDocuments();
+      return joinedGuests.documents;
+    }
+    else{
+      final QuerySnapshot joinedGuests=await firestore.collection('OnlineEvents').document(widget.eventCode).collection('guests').getDocuments();
+      return joinedGuests.documents;
+    }
   }
   @override
   Widget build(BuildContext context) {
@@ -39,9 +47,16 @@ class _PassesAlottedState extends State<PassesAlotted> {
             return ListView.builder(
               itemCount:snapshot.data.length,
               itemBuilder:(context,index){
-                return ListTile(
-                 title:Text("${snapshot.data[index].data['name']}",),
-                 subtitle: Text("${snapshot.data[index].data['phone']==null?snapshot.data[index].data['email']:snapshot.data[index].data['phone']}"),
+                return Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Card(
+                    color: Colors.pink[50],
+                    child: ListTile(
+                     title:Text("${snapshot.data[index].data['name']} (${snapshot.data[index].data['passCode']})",),
+                     subtitle: Text("${snapshot.data[index].data['phone']==null?snapshot.data[index].data['email']:snapshot.data[index].data['phone']}"),
+                     trailing: Text("${widget.price.toInt()}*${snapshot.data[index].data['ticketCount']}= ₹ ${snapshot.data[index].data['ticketCount']*widget.price}"),
+                    ),
+                  ),
                 );
               }
             );
@@ -68,7 +83,8 @@ class _PassesAlottedState extends State<PassesAlotted> {
 
 class ScannedList extends StatefulWidget {
   final String eventCode;
-  ScannedList(this.eventCode);
+  final bool isOnline;
+  ScannedList(this.eventCode,this.isOnline);
   @override
   _ScannedListState createState() => _ScannedListState();
 }
@@ -77,8 +93,14 @@ class _ScannedListState extends State<ScannedList> {
   var firestore=Firestore.instance;
   Future<List<DocumentSnapshot>> users;
   Future getData()async{
-    final QuerySnapshot result= await firestore.collection('events').document(widget.eventCode).collection('guests').where('Scanned',isEqualTo:true).getDocuments();
-    return result.documents;
+    if(!widget.isOnline){
+      final QuerySnapshot result= await firestore.collection('events').document(widget.eventCode).collection('guests').where('Scanned',isEqualTo:true).getDocuments();
+      return result.documents;
+    }
+    else{
+      final QuerySnapshot result= await firestore.collection('events').document(widget.eventCode).collection('guests').where('Scanned',isEqualTo:true).getDocuments();
+      return result.documents;
+    }
   }
   @override
   Widget build(BuildContext context) {

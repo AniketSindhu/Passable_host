@@ -17,7 +17,8 @@ class Announcements extends StatefulWidget {
   final bool isOwner;
   final String eventCode;
   final bool isOnline;
-  Announcements(this.eventCode,this.isOwner,this.isOnline);
+  final String eventName;
+  Announcements(this.eventCode,this.isOwner,this.isOnline,this.eventName);
   @override
   _AnnouncementsState createState() => _AnnouncementsState();
 }
@@ -28,7 +29,7 @@ class _AnnouncementsState extends State<Announcements> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: widget.isOwner?FloatingActionButton.extended(
-        onPressed:()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateAnnouncement(widget.eventCode,widget.isOnline))),
+        onPressed:()=>Navigator.push(context, MaterialPageRoute(builder: (context)=>CreateAnnouncement(widget.eventCode,widget.isOnline,widget.eventName))),
         icon: Icon(Icons.add,),
         backgroundColor: AppColors.tertiary,
         splashColor: AppColors.secondary,
@@ -155,7 +156,8 @@ Widget announceWidget(Announce announce, bool isOwner,String eventCode,bool isOn
 class CreateAnnouncement extends StatefulWidget {
   final String eventCode;
   final bool isOnline;
-  CreateAnnouncement(this.eventCode,this.isOnline);
+  final String eventName;
+  CreateAnnouncement(this.eventCode,this.isOnline,this.eventName);
   @override
   _CreateAnnouncementState createState() => _CreateAnnouncementState();
 }
@@ -175,7 +177,7 @@ class _CreateAnnouncementState extends State<CreateAnnouncement> {
           setState(() {
             uploading=true;
           });
-          FirebaseAdd().announce(widget.eventCode, descriptionController.text, _image,widget.isOnline).then((value){
+          FirebaseAdd().announce(widget.eventCode, descriptionController.text, _image,widget.isOnline,widget.eventName).then((value){
               uploading=false;
               Navigator.pop(context);
             });

@@ -749,6 +749,8 @@ class _TicketInfoState extends State<TicketInfo> {
   TextEditingController ticketPriceController=TextEditingController();
   TextEditingController ticketCountController=TextEditingController();
   TextEditingController passcodeController=TextEditingController();
+  TextEditingController upiController=TextEditingController();
+
   onPaidSelect(String x){
     if(x=='yes')
     setState(() {
@@ -1047,7 +1049,7 @@ class _TicketInfoState extends State<TicketInfo> {
             Padding(
               padding: const EdgeInsets.only(top:2,bottom:12),
               child: Text(
-                'Do you want your event to be protected by a code?, If yes then only people with that code can buy or redeem passes/ticket to this event. Select Yes if you want certain audience to come at your event',
+                'Yes : Only People with code can buy or redeem passes of this event.\nNo: Anyone can buy passes of this event aisa krde',
                 style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
             ),
             Row(
@@ -1098,7 +1100,7 @@ class _TicketInfoState extends State<TicketInfo> {
             isPaid?Padding(
               padding: const EdgeInsets.only(top:2,bottom:12),
               child: Text(
-                'If you are associated with a partner of passable enter his code, the fee will be split in 75:25 with the partner',
+                'If you are referred by one of our Partners, please mention his/her code.',
                 style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
             ):Container(),
             isPaid?EventCreateTextField(
@@ -1108,6 +1110,36 @@ class _TicketInfoState extends State<TicketInfo> {
               radius: 5,
               controller: passcodeController,
               hint: "Enter code here",
+              icon: Icon(FontAwesome.keyboard_o,color:AppColors.secondary,),
+              onChanged: (val){
+              }, 
+            ):Container(),
+            isPaid?SizedBox(height:10):Container(),
+            isPaid?Divider(thickness:1):Container(),
+            isPaid?SizedBox(height:8):Container(),
+            isPaid?Text('Payment details',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)):Container(),
+            isPaid?Padding(
+              padding: const EdgeInsets.only(top:2,bottom:12),
+              child: Text(
+                'Enter your UPI ID for receiving the payment.Payment will be transferred within 24 hrs after event completion.For any other payment method contact your personal helper which will be assigned after event creation',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
+            ):Container(),
+            isPaid?EventCreateTextField(
+              maxLines:1,
+              number:false,
+              width:0.5,
+              radius: 5,
+              controller: upiController,
+              validator:(val){
+                Pattern pattern =
+                    r'^[\w\.\-_]{3,}@[a-zA-Z]{3,}';
+                RegExp regex = new RegExp(pattern);
+                if (!regex.hasMatch(val))
+                  return 'Enter Valid UPI ID';
+                else
+                  return null;
+              },
+              hint: "Enter UPI ID",
               icon: Icon(FontAwesome.keyboard_o,color:AppColors.secondary,),
               onChanged: (val){
               }, 
@@ -1177,9 +1209,7 @@ class _CongoScreenState extends State<CongoScreen> {
           child: FloatingActionButton.extended(
             label: Text('Finish'),
             onPressed:(){
-              Navigator.of(context)
-              .popUntil(ModalRoute.withName("/homepage"));
-              Navigator.push(context, MaterialPageRoute(builder: (context){return HomePage();}));
+              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context){return HomePage();}), ModalRoute.withName('/homepage'));
             },
             icon: Icon(Icons.play_arrow),
             tooltip: 'continue',
@@ -1267,7 +1297,7 @@ class _CongoScreenState extends State<CongoScreen> {
 
 
 class EventCreateTextField extends StatelessWidget {
-
+  
   EventCreateTextField(
       {this.icon,
       this.hint,

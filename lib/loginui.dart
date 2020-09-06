@@ -144,9 +144,8 @@ class _LoginState extends State<Login> {
                   child:RichText(
                     text: TextSpan(
                       children:<TextSpan>[
-                        TextSpan(text:"Pass'",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:45,fontWeight: FontWeight.bold))),
-                        TextSpan(text:"it",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.secondary,fontSize:45,fontWeight: FontWeight.bold))),
-                        TextSpan(text:"'on",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:45,fontWeight: FontWeight.bold)))
+                        TextSpan(text:"Passable",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:45,fontWeight: FontWeight.bold))),
+                        TextSpan(text:" Host",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.secondary,fontSize:45,fontWeight: FontWeight.bold))),
                       ] 
                     )
                   ),
@@ -162,7 +161,6 @@ class _LoginState extends State<Login> {
               Column(
                 children: <Widget>[
                   SignInButton(Buttons.GoogleDark, onPressed:()=>signInWithGoogle(context)),
-                  SignInButton(Buttons.Facebook, onPressed:()=>MobileLogin()),
                   SizedBox(height:height/50),
                   OutlineButton(
                     highlightedBorderColor: AppColors.tertiary,

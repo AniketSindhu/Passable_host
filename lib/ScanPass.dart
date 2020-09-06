@@ -25,10 +25,7 @@ class _ScanPassState extends State<ScanPass> {
        if(x.data['Scanned']==false)
         {
           Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).collection('guests').document(res).updateData({'Scanned':true});
-          Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).get().then((value){
-            int counter=value.data['scanDone'];
-            Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).updateData({'scanDone':counter+1});
-            });
+          Firestore.instance.collection(widget.isOnline?'OnlineEvents':'events').document(widget.eventCode).updateData({'scanDone':FieldValue.increment(x.data['ticketCount'])});
           showDialog(
             context:contextMain,
             builder: (context){
@@ -56,7 +53,7 @@ class _ScanPassState extends State<ScanPass> {
                     children: [
                       Lottie.asset('assets/done.json',repeat: false),
                       SizedBox(height:10),
-                      Text("Entry is allowed",style:TextStyle(color: Colors.greenAccent,fontSize: 18,fontWeight: FontWeight.bold)),
+                      Text("Allow ${x.data['ticketCount']} entries",style:TextStyle(color: Colors.greenAccent,fontSize: 18,fontWeight: FontWeight.bold)),
                     ],
                   )
                 ),

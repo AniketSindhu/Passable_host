@@ -60,13 +60,15 @@ dependencies:
   url_launcher: ^5.5.0
   international_phone_input: ^1.0.4
   flutter_icons: ^1.1.0
-
+  flutter_svg: ^0.17.4
+  percent_indicator: ^2.1.5
+  
 dev_dependencies:
   flutter_config: ^1.0.7
 
 dependency_overrides:
   flutter_chips_input: ^1.9.0-dev.1
-  flutter_svg: ^0.18.0
+
 
   flutter_test:
     sdk: flutter

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:passable_host/methods/getUserId.dart';
@@ -17,7 +18,8 @@ class FirebaseAdd{
     String _uploadedFileURL;
     String fileName = "Banners/$eventCode";
     globals.eventAddLoading=true;
-
+    var _random = new Random();
+    int i=_random.nextInt(3);
     StorageReference firebaseStorageRef =
     FirebaseStorage.instance.ref().child(fileName);
     StorageUploadTask uploadTask = firebaseStorageRef.putFile(_image);
@@ -66,8 +68,10 @@ class FirebaseAdd{
       'hostEmail':hostEmail,
       'hostPhoneNumber':hostPhone,
       'amountEarned':0.0,
+      'amount_to_be_paid':0.0,
       'ticketPrice':ticketPrice,
-      'eventCategory':eventCategory
+      'eventCategory':eventCategory,
+      'helper':i
     });
   }
   else{
@@ -90,14 +94,17 @@ class FirebaseAdd{
       'hostEmail':hostEmail,
       'hostPhoneNumber':hostPhone,
       'amountEarned':0.0,
+      'amount_to_be_paid':0.0,
       'ticketPrice':ticketPrice,
-      'eventCategory':eventCategory
+      'eventCategory':eventCategory,
+      'helper':i
     });
   }
 }
 
-  Future<bool> announce(String eventCode,String description,File image,bool isOnline) async{
+  Future<bool> announce(String eventCode,String description,File image,bool isOnline,String eventName) async{
     String _uploadedFileURL;
+    String id=randomAlphaNumeric(8);
     if(image!=null){
     StorageReference firebaseStorageRef =
       FirebaseStorage.instance.ref().child("$eventCode/${randomAlphaNumeric(8)}");
@@ -108,7 +115,14 @@ class FirebaseAdd{
         _uploadedFileURL = fileURL;
       });
     }
-    String id=randomAlphaNumeric(8);
+    Firestore.instance.collection('Announcements').document(id).setData({
+      'description':description,
+      'eventName':eventName,
+      'media':_uploadedFileURL,
+      'token':eventCode,
+      'timestamp':DateTime.now(),
+      'id':id
+    });
     if(isOnline){
       Firestore.instance.collection("OnlineEvents").document(eventCode).collection('Announcements').document(id).setData({
       'description':description,

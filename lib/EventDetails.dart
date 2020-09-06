@@ -12,6 +12,7 @@ import 'package:passable_host/config/size.dart';
 import 'package:passable_host/lists.dart';
 import 'package:passable_host/scanPass.dart';
 import 'package:random_string/random_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'Pass.dart';
 import 'config/config.dart';
 import 'package:flutter_show_more/flutter_show_more.dart';
@@ -31,6 +32,11 @@ class _DetailPageState extends State<DetailPage> {
   final _key = new GlobalKey();
   int page=0;
   bool isTeam;
+
+  Future helper()async{
+    final x=await Firestore.instance.collection('helpers').getDocuments();
+    return x.documents;
+  }
   void isTeamMember() async{
     final x = await Firestore.instance.collection('users').document(widget.uid).collection('eventsHosted').document(widget.post.data['eventCode']).get();
     isTeam=x.data['isTeam'];
@@ -274,10 +280,34 @@ class _DetailPageState extends State<DetailPage> {
                 ),
                 shouldShowLessText: false,
               ),
+              SizedBox(height:30),
+              Align(
+                child: Text('Personal Helper',style: GoogleFonts.varelaRound(textStyle:TextStyle(color: AppColors.primary,fontWeight: FontWeight.bold,fontSize: 24)),),
+                alignment: Alignment.centerLeft,
+              ),
+              Divider(color:AppColors.secondary,height: 10,thickness: 2,),
+              SizedBox(height:10),
+              FutureBuilder(
+                future: helper(),
+                builder:(context,snap){
+                  if(snap.connectionState==ConnectionState.waiting||snap.data==null)
+                    {
+                      return Container();
+                    }
+                  else
+                  return RaisedButton(
+                    onPressed: (){
+                      launch('${snap.data[widget.post.data['helper']].data['contact']}');
+                    },
+                    color: Colors.amber,
+                    child: Text('Contact ${snap.data[widget.post.data['helper']].data['name']}',style: TextStyle(fontSize: 18, color: Colors.black),),
+                  );
+                },
+              ),
             ],
           ),
         )
-      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode'],widget.post.data['isOnline']):page==3?TeamPage(widget.post.data['eventCode'],isTeam,widget.post.data['isOnline']):Announcements(widget.post.data['eventCode'], true,widget.post.data['isOnline'])
+      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode'],widget.post.data['isOnline']):page==3?TeamPage(widget.post.data['eventCode'],isTeam,widget.post.data['isOnline']):Announcements(widget.post.data['eventCode'], true,widget.post.data['isOnline'],widget.post.data['isOnline'])
     );
   }
 }
