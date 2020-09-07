@@ -13,7 +13,7 @@ class FirebaseAdd{
     Firestore.instance.collection('users').document(uid)
     .setData({ 'name': name, 'email': email,'phoneNumber': phoneNumber,'uid':uid,'isIndia':isIndia},merge: true);
 }
-  addEvent (String eventName,String eventCode,String eventDescription,String eventAddress,int maxAttendee,File _image,DateTime dateTime,GeoFirePoint eventLocation,String hostName,String hostEmail,String hostPhone,String eventCategory, bool isOnline, bool isPaid, bool isProtected,double ticketPrice,String partner) async {
+  addEvent (String eventName,String eventCode,String eventDescription,String eventAddress,int maxAttendee,File _image,DateTime dateTime,GeoFirePoint eventLocation,String hostName,String hostEmail,String hostPhone,String eventCategory, bool isOnline, bool isPaid, bool isProtected,double ticketPrice,String partner,String upi) async {
     String uid= await getCurrentUid();
     String _uploadedFileURL;
     String fileName = "Banners/$eventCode";
@@ -71,7 +71,8 @@ class FirebaseAdd{
       'amount_to_be_paid':0.0,
       'ticketPrice':ticketPrice,
       'eventCategory':eventCategory,
-      'helper':i
+      'helper':i,
+      'payment_detail':upi
     });
   }
   else{
@@ -97,7 +98,8 @@ class FirebaseAdd{
       'amount_to_be_paid':0.0,
       'ticketPrice':ticketPrice,
       'eventCategory':eventCategory,
-      'helper':i
+      'helper':i,
+      'payment_detail':upi
     });
   }
 }

@@ -778,6 +778,8 @@ class _TicketInfoState extends State<TicketInfo> {
   }
 
   void validateInputs () async{
+    Pattern pattern =r'^[\w\.\-_]{3,}@[a-zA-Z]{3,}';
+    RegExp regex = new RegExp(pattern);
     if(ticketCount<=10){
       Fluttertoast.showToast(
         msg:'Ticket count must be greater than 10 ',
@@ -798,6 +800,16 @@ class _TicketInfoState extends State<TicketInfo> {
         gravity: ToastGravity.TOP
       );   
     }
+    else if(!regex.hasMatch(upiController.text)){
+        Fluttertoast.showToast(
+          msg:'Enter Valid UPI ID',
+          backgroundColor: Colors.red,
+          fontSize: 18,
+          textColor: Colors.white,
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP
+        ); 
+    }
     else if(passcodeController.text.trim().length!=0&&passcodeController.text!=null&&passcodeController.text!=''){
       final x= await Firestore.instance.collection('partners').document(passcodeController.text).get();
       if(!x.exists){
@@ -810,6 +822,7 @@ class _TicketInfoState extends State<TicketInfo> {
           gravity: ToastGravity.TOP
         ); 
       }
+
       else{
         await FirebaseAdd().addEvent(
           widget.eventName,
@@ -828,7 +841,8 @@ class _TicketInfoState extends State<TicketInfo> {
           isPaid, 
           isProtected, 
           ticketPrice, 
-          passcodeController.text
+          passcodeController.text,
+          upiController.text
         );
         Navigator.push(context, MaterialPageRoute(builder: (context){
           return CongoScreen(widget.eventName,widget.eventCode,widget.eventAddress,widget.image,widget.eventDateTime);
@@ -853,7 +867,8 @@ class _TicketInfoState extends State<TicketInfo> {
           isPaid, 
           isProtected, 
           ticketPrice, 
-          null
+          null,
+          upiController.text
         );
         Navigator.push(context, MaterialPageRoute(builder: (context){
           return CongoScreen(widget.eventName,widget.eventCode,widget.eventAddress,widget.image,widget.eventDateTime);
@@ -1130,15 +1145,6 @@ class _TicketInfoState extends State<TicketInfo> {
               width:0.5,
               radius: 5,
               controller: upiController,
-              validator:(val){
-                Pattern pattern =
-                    r'^[\w\.\-_]{3,}@[a-zA-Z]{3,}';
-                RegExp regex = new RegExp(pattern);
-                if (!regex.hasMatch(val))
-                  return 'Enter Valid UPI ID';
-                else
-                  return null;
-              },
               hint: "Enter UPI ID",
               icon: Icon(FontAwesome.keyboard_o,color:AppColors.secondary,),
               onChanged: (val){
@@ -1268,7 +1274,7 @@ class _CongoScreenState extends State<CongoScreen> {
                           await FlutterShare.share(
                             title: 'Get entry pass for ${widget.eventName}',
                             text: 'Enter the code ''${widget.eventCode}'' to get an entry pass for the ${widget.eventName} happening on ${DateFormat('dd-MM-yyyy  hh:mm a').format(widget.dateTime)}',
-                            linkUrl: 'https://flutter.dev/',
+                            linkUrl: 'https://passable.in',
                             chooserTitle: 'Get entry pass for ${widget.eventName}'
                           );
                         }),
