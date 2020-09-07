@@ -307,7 +307,7 @@ class _DetailPageState extends State<DetailPage> {
             ],
           ),
         )
-      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode'],widget.post.data['isOnline']):page==3?TeamPage(widget.post.data['eventCode'],isTeam,widget.post.data['isOnline']):Announcements(widget.post.data['eventCode'], true,widget.post.data['isOnline'],widget.post.data['isOnline'])
+      ):page==1?Dashboard(isTeam,widget.post):page==2?ScanPass(widget.post.data['eventCode'],widget.post.data['isOnline']):page==3?TeamPage(widget.post.data['eventCode'],isTeam,widget.post.data['isOnline']):Announcements(widget.post.data['eventCode'], true,widget.post.data['isOnline'],widget.post.data['eventName'])
     );
   }
 }
