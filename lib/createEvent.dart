@@ -973,7 +973,7 @@ class _TicketInfoState extends State<TicketInfo> {
                           }
                         else
                         ticketCount=int.parse(val);
-                            });
+                      });
                     },
                     controller: ticketCountController,
                     style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 16),

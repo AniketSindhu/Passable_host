@@ -124,6 +124,7 @@ class _ScannedListState extends State<ScannedList> {
               itemBuilder:(context,index){
                 return ListTile(
                  title:Text("${snapshot.data[index].data['name']}",),
+                 trailing: Text("X ${snapshot.data[index].data['ticketCount']}",),
                  subtitle: Text("${snapshot.data[index].data['phone']==null?snapshot.data[index].data['email']:snapshot.data[index].data['phone']}"),
                 );
               }
