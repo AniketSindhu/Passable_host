@@ -9,6 +9,7 @@ import 'package:passable_host/Dashboard.dart';
 import 'package:passable_host/Models/user.dart';
 import 'package:passable_host/Team.dart';
 import 'package:passable_host/config/size.dart';
+import 'package:passable_host/edit_event.dart';
 import 'package:passable_host/lists.dart';
 import 'package:passable_host/scanPass.dart';
 import 'package:random_string/random_string.dart';
@@ -233,7 +234,7 @@ class _DetailPageState extends State<DetailPage> {
                       splashColor: AppColors.primary,
                       highlightColor: AppColors.primary,
                       onPressed: (){
-                        //edit event
+                        Navigator.push(context, MaterialPageRoute(builder: (context)=>EditPage(widget.post)));
                       }, 
                     ),
                     IconButton(
@@ -244,8 +245,8 @@ class _DetailPageState extends State<DetailPage> {
                       onPressed:()async{
                         await FlutterShare.share(
                           title: 'Get entry pass for ${widget.post.data['eventName']}',
-                          text: 'Enter the code ''${widget.post.data['eventCode']}'' to get an entry pass for the ${widget.post.data['eventName']} happening on ${DateFormat('dd-MM-yyyy AT hh:mm a').format(widget.post.data['eventDateTime'].toDate())}',
-                          linkUrl: 'https://flutter.dev/',
+                          text: ' Get passes for ${widget.post.data['eventName']} happening on ${DateFormat('dd-MM-yyyy AT hh:mm a').format(widget.post.data['eventDateTime'].toDate())}\n\n Event Code:''${widget.post.data['eventCode']}''',
+                          linkUrl: 'https://passable.in/',
                           chooserTitle: 'Get entry pass for ${widget.post.data['eventName']}'
                         );
                       }
