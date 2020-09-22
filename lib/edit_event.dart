@@ -12,6 +12,7 @@ class EditPage extends StatefulWidget {
 
 class MapScreenState extends State<EditPage>
     with SingleTickerProviderStateMixin {
+  
   bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -87,7 +88,6 @@ class MapScreenState extends State<EditPage>
     // TODO: implement initState
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     final hostNameController=TextEditingController(text: widget.post.data['hostName']);
@@ -220,7 +220,7 @@ class MapScreenState extends State<EditPage>
                                     controller: nameController,
                                     validator: (value) => value.length<2?'*must be 2 character long':null,
                                     decoration: InputDecoration(
-                                      hintText: widget.post.data['eventName'],
+                                      hintText: 'Event Name',
                                     ),
                                     enabled: !_status,
                                     autofocus: !_status,
@@ -260,7 +260,7 @@ class MapScreenState extends State<EditPage>
                                     validator: (value) => value.length<2?'*must be 2 character long':null,
                                     controller: descriptionController,
                                     decoration: InputDecoration(
-                                        hintText: widget.post.data['eventDescription']
+                                        hintText: 'event Description'
                                       ),
                                     enabled: !_status,
                                   ),
@@ -333,7 +333,7 @@ class MapScreenState extends State<EditPage>
                                     validator: (value) => value.trim().length>0?null:'Enter a valid name',
                                     controller: hostNameController,
                                     decoration: new InputDecoration(
-                                        hintText: widget.post.data['hostName']),
+                                        hintText: 'Host Name'),
                                     enabled: !_status,
                                   ),
                                 ),
@@ -380,9 +380,20 @@ class MapScreenState extends State<EditPage>
                                 Flexible(
                                   child: Padding(
                                     padding: EdgeInsets.only(right: 10.0),
-                                    child: new TextField(
+                                    child: new TextFormField(
+                                      controller: hostPhoneController,
+                                      keyboardType: TextInputType.number,
+                                      validator: (val){
+                                        Pattern pattern =
+                                            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                                        RegExp regex = new RegExp(pattern);
+                                        if (!regex.hasMatch(val))
+                                          return 'Enter Valid Phone Number';
+                                        else
+                                          return null;
+                                      },
                                       decoration: const InputDecoration(
-                                          hintText: "Enter Pin Code"),
+                                          hintText: "Host PhoneNumber"),
                                       enabled: !_status,
                                     ),
                                   ),
