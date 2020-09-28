@@ -280,9 +280,7 @@ class MapScreenState extends State<EditPage>
                                     labelText: 'Category of the event',
                                 ),
                                 onChanged: (value){
-                                  setState(() {
-                                    selectedCategory=value;
-                                  });
+                                  selectedCategory=value;
                                 },
                               ),
                             ),
@@ -360,7 +358,7 @@ class MapScreenState extends State<EditPage>
                                 Expanded(
                                   child: Container(
                                     child: new Text(
-                                      'State',
+                                      'Email',
                                       style: TextStyle(
                                           fontSize: 16.0,
                                           fontWeight: FontWeight.bold),
@@ -401,8 +399,10 @@ class MapScreenState extends State<EditPage>
                                 ),
                                 Flexible(
                                   child: new TextField(
+                                    controller: hostEmailController,
                                     decoration: const InputDecoration(
-                                        hintText: "Enter State"),
+                                        hintText: "Enter Host Email",
+                                        ),
                                     enabled: !_status,
                                   ),
                                   flex: 2,
