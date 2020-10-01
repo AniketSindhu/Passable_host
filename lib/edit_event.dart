@@ -1,8 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'config/config.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
+import 'dart:async';
+import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
+import 'package:flutter_icons/flutter_icons.dart';
+import 'package:place_picker/place_picker.dart' as latlng;
+
 class EditPage extends StatefulWidget {
   final DocumentSnapshot post;
   EditPage(this.post);
@@ -16,8 +25,15 @@ class MapScreenState extends State<EditPage>
   bool _status = true;
   final FocusNode myFocusNode = FocusNode();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  Completer<maps.GoogleMapController> _controller = Completer();
   bool _autoValidate = false;
   String selectedCategory;
+  Geoflutterfire geo = Geoflutterfire();
+  PickResult mainResult;
+  GeoFirePoint myLocation;
+  TextEditingController eventAddController;
+  TextEditingController ticketPriceController;
+  TextEditingController paymentDetailController;
   List<DropdownMenuItem> categoryList=[
     DropdownMenuItem(
       child: Text('Appearance/Singing',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,),),
@@ -83,6 +99,32 @@ class MapScreenState extends State<EditPage>
       });
     }
   }
+  void showPlacePicker() async {
+   Navigator.push(
+   context,
+    MaterialPageRoute(
+      builder: (context) => PlacePicker(
+        apiKey:  'AIzaSyAJBaI8jdFjekZnRgtJ10DsNVF3RuSfXfc', 
+        onPlacePicked: (result) { 
+          mainResult=result;
+          eventAddController.text=mainResult.formattedAddress;
+          myLocation = geo.point(latitude: result.geometry.location.lat, longitude: result.geometry.location.lng); 
+           Navigator.of(context).pop();
+         },
+         initialPosition:latlng.LatLng(28.7041, 77.1025),
+         useCurrentLocation: true,
+       ),
+     ),
+  ).then((value) async{
+    final maps.GoogleMapController controller = await _controller.future;
+    controller.animateCamera(maps.CameraUpdate.newCameraPosition(
+      maps.CameraPosition(
+        target:maps.LatLng(myLocation.latitude,myLocation.longitude),
+        zoom: 15.4746
+      )
+    ));
+  });
+  }
   @override
   void initState() {
     // TODO: implement initState
@@ -90,13 +132,20 @@ class MapScreenState extends State<EditPage>
   }
   @override
   Widget build(BuildContext context) {
+    bool isOnline=widget.post.data['isOnline'];
+    bool isPaid=widget.post.data['isPaid'];
+    DateTime dateTime=widget.post.data['eventDateTime'].toDate();
     final hostNameController=TextEditingController(text: widget.post.data['hostName']);
     final hostEmailController=TextEditingController(text: widget.post.data['hostEmail']);
     final hostPhoneController=TextEditingController(text: widget.post.data['hostPhoneNumber']);
     final nameController=TextEditingController(text: widget.post.data['eventName']);
     final descriptionController=TextEditingController(text: widget.post.data['eventDescription']);
-    final eventAddController=TextEditingController(text: widget.post.data['eventAddress']);
     final maxAttendeeController=TextEditingController(text: widget.post.data['maxAttendee'].toString());
+    paymentDetailController=TextEditingController(text: widget.post.data['payment_detail'].toString());
+    final dateTimeController=TextEditingController(text: DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime));
+    eventAddController=TextEditingController(text: widget.post.data['eventAddress']);
+    !isOnline?myLocation=geo.point(latitude: widget.post.data['position']['geopoint'].latitude, longitude: widget.post.data['position']['geopoint'].longitude):{};
+    isPaid? ticketPriceController.text= widget.post.data['ticketPrice'].toString():{};
     return new Scaffold(
       appBar: AppBar(title: Text("Edit Event"),),
       body: new Container(
@@ -381,15 +430,6 @@ class MapScreenState extends State<EditPage>
                                     child: new TextFormField(
                                       controller: hostPhoneController,
                                       keyboardType: TextInputType.number,
-                                      validator: (val){
-                                        Pattern pattern =
-                                            r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-                                        RegExp regex = new RegExp(pattern);
-                                        if (!regex.hasMatch(val))
-                                          return 'Enter Valid Phone Number';
-                                        else
-                                          return null;
-                                      },
                                       decoration: const InputDecoration(
                                           hintText: "Host PhoneNumber"),
                                       enabled: !_status,
@@ -398,7 +438,16 @@ class MapScreenState extends State<EditPage>
                                   flex: 2,
                                 ),
                                 Flexible(
-                                  child: new TextField(
+                                  child: new TextFormField(
+                                  validator: (value){
+                                      Pattern pattern =
+                                          r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                                      RegExp regex = new RegExp(pattern);
+                                      if (!regex.hasMatch(value))
+                                        return 'Enter Valid Email';
+                                      else
+                                        return null;
+                                    },
                                     controller: hostEmailController,
                                     decoration: const InputDecoration(
                                         hintText: "Enter Host Email",
@@ -409,6 +458,129 @@ class MapScreenState extends State<EditPage>
                                 ),
                               ],
                             )),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: 25.0, right: 25.0, top: 30.0),
+                              child: new Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  new Text(
+                                    'Date & Time',
+                                    style: TextStyle(
+                                        fontSize: 22.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left:25),
+                              child: GestureDetector(
+                                onTap: () async{
+                                  final DateTime picked = await DatePicker.showDateTimePicker(context,
+                                    showTitleActions: true,
+                                    minTime: DateTime.now(),
+                                    maxTime: DateTime.now().add(new Duration(days: 365))
+                                  );
+                                  if (picked != null && picked != dateTime)
+                                      dateTime= picked;
+                                      dateTimeController.text = DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime);
+                                },
+                                child: AbsorbPointer(
+                                  child: TextFormField(
+                                    enabled: !_status,
+                                    controller:dateTimeController,
+                                    validator: (value) => null,
+                                    decoration: InputDecoration(
+                                      hintText: "Event Date & Time",
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            !isOnline?Padding(
+                              padding: EdgeInsets.only(
+                                left: 25.0, right: 25.0, top: 30.0),
+                              child: new Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  new Text(
+                                    'Address',
+                                    style: TextStyle(
+                                        fontSize: 22.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ):Container(),
+                            !isOnline?Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Container(
+                                height: 200,
+                                child: Column(
+                                  children: [
+                                    Expanded(
+                                      child: maps.GoogleMap(
+                                        onMapCreated: (maps.GoogleMapController controller) {
+                                          _controller.complete(controller);
+                                        },
+                                        markers: {
+                                          maps.Marker(
+                                            markerId: maps.MarkerId('marker'),
+                                            position:maps.LatLng(myLocation.latitude,myLocation.longitude) ,
+                                          )
+                                        },            
+                                        initialCameraPosition: maps.CameraPosition(
+                                          target:maps.LatLng(myLocation.latitude,myLocation.longitude),
+                                          zoom: 15.4746
+                                        ),
+                                        mapType: maps.MapType.normal,
+                                      ),
+                                    ),
+                                    Container(
+                                      width: double.infinity,
+                                      child: !_status?RaisedButton(
+                                        color:AppColors.primary,
+                                        splashColor: AppColors.tertiary,
+                                        child: Icon(FontAwesome.edit,color:Colors.white),
+                                        onPressed:(){
+                                          showPlacePicker();
+                                        },
+                                      ):Container(),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ):Container(),
+                            !isOnline?Padding(
+                              padding: const EdgeInsets.symmetric(horizontal:25),
+                              child: TextFormField(
+                                validator: (value) => value.length<10?'*must be 10 character long':null,
+                                decoration: InputDecoration(
+                                  hintText: 'Event Address'
+                                ),
+                                controller: eventAddController,
+                                enabled: !_status,
+                              ),
+                            ):Container(),
+                            isPaid?Padding(
+                              padding: EdgeInsets.only(
+                                left: 25.0, right: 25.0, top: 30.0),
+                              child: new Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  new Text(
+                                    'Ticket Info',
+                                    style: TextStyle(
+                                        fontSize: 22.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ):Container(),
                         !_status ? _getActionButtons() : new Container(),
                       ],
                     ),
