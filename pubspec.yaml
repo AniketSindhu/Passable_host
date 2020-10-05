@@ -63,6 +63,8 @@ dependencies:
   flutter_svg: ^0.17.4
   percent_indicator: ^2.1.5
   wiredash: ^0.2.0
+  cached_network_image: ^2.3.2+1
+  skeleton_text: ^1.0.0
   
 dev_dependencies:
   flutter_config: ^1.0.7

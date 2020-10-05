@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'Widgets/eventCard.dart';
 import 'config/config.dart';
 import 'config/size.dart';
+import 'package:skeleton_text/skeleton_text.dart';
 
 class HomePage extends StatefulWidget {
   @override

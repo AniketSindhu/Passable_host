@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:passable_host/Methods/getUserId.dart';
 import 'package:passable_host/config/config.dart';
 import 'package:passable_host/EventDetails.dart';
+import 'package:skeleton_text/skeleton_text.dart';
 
 Widget eventCard(DocumentSnapshot event,double height,double width, BuildContext context){
   return Padding(
@@ -28,7 +30,24 @@ Widget eventCard(DocumentSnapshot event,double height,double width, BuildContext
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
-                    Align(alignment:Alignment.topLeft,child: Image.network(event.data['eventBanner'],fit: BoxFit.fitHeight,width: width*0.3,height: height*0.3,)),
+                    Align(
+                      alignment:Alignment.topLeft,
+                      child: CachedNetworkImage(
+                        imageUrl: event.data['eventBanner'],
+                        fit: BoxFit.fitHeight,
+                        width: width*0.3,
+                        height: height*0.3,
+                        placeholder :(context, url) => SkeletonAnimation(  
+                          child: Container(  
+                            width: width*0.3,  
+                            height: height*0.3,  
+                            decoration: BoxDecoration(  
+                                color: Colors.grey[400],  
+                            ),  
+                          ), 
+                        ),
+                      )
+                    ),
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.fromLTRB(8.0,16,8,0),

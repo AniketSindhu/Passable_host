@@ -1,8 +1,10 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:skeleton_text/skeleton_text.dart';
 import 'Models/AnnouncementClass.dart';
 import 'config/config.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -119,7 +121,19 @@ Widget announceWidget(Announce announce, bool isOwner,String eventCode,bool isOn
           margin: EdgeInsets.symmetric(horizontal:15),
           child:ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Image.network(announce.media,fit:BoxFit.cover,),
+            child: CachedNetworkImage(
+              imageUrl:announce.media,
+              placeholder: (context, url) => SkeletonAnimation(  
+                child: Container(  
+                  width: double.infinity,  
+                  height: 250,  
+                  decoration: BoxDecoration(  
+                      color: Colors.purple[100],  
+                  ),  
+                ),
+              ),
+              fit:BoxFit.cover,
+            ),
           )
         ):Container(),
       Padding(
