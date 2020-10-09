@@ -9,7 +9,8 @@ class PassesAlotted extends StatefulWidget {
   final bool isOnline;
   final String eventCode;
   final double price;
-  PassesAlotted(this.eventCode,this.isOnline,this.price);
+  final bool isPaid;
+  PassesAlotted(this.eventCode,this.isOnline,this.price,this.isPaid);
   @override
   _PassesAlottedState createState() => _PassesAlottedState();
 }
@@ -54,7 +55,7 @@ class _PassesAlottedState extends State<PassesAlotted> {
                     child: ListTile(
                      title:Text("${snapshot.data[index].data['name']} (${snapshot.data[index].data['passCode']})",),
                      subtitle: Text("${snapshot.data[index].data['phone']==null?snapshot.data[index].data['email']:snapshot.data[index].data['phone']}"),
-                     trailing: Text("${widget.price.toInt()}*${snapshot.data[index].data['ticketCount']}= ₹ ${snapshot.data[index].data['ticketCount']*widget.price}"),
+                     trailing: widget.isPaid?Text("${snapshot.data[index].data['ticketPrice']}*${snapshot.data[index].data['ticketCount']}= ₹ ${snapshot.data[index].data['ticketCount']*snapshot.data[index].data['ticketPrice']}"):Text('X ${snapshot.data[index].data['ticketCount']}'),
                     ),
                   ),
                 );

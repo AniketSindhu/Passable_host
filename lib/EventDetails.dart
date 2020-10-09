@@ -235,7 +235,7 @@ class _DetailPageState extends State<DetailPage> {
                       splashColor: AppColors.primary,
                       highlightColor: AppColors.primary,
                       onPressed: (){
-                        if(DateTime.now().isBefore(widget.post.data['eventDateTime'].toDate()))
+                        if(DateTime.now().isBefore(widget.post.data['eventDateTime'].toDate())&&!isTeam)
                           Navigator.push(context, MaterialPageRoute(builder: (context)=>EditPage(widget.post,widget.rebuild)));
                         else 
                           Fluttertoast.showToast(msg: 'You cant edit your past ;)',backgroundColor:Colors.red,textColor:Colors.white,gravity: ToastGravity.TOP);

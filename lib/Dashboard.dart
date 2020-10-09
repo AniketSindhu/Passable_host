@@ -43,13 +43,13 @@ class _DashboardState extends State<Dashboard> {
               progressColor: Colors.amber
             ),
             SizedBox(height:10),
-            Row(
+            widget.post.data['isPaid']?Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 colorCard("Gross Earnings", widget.post.data['amountEarned'], 1, context, Color(0xFF1b5bff)),
                 colorCard("Net Earnings", widget.post.data['amountEarned']*92/100, 1, context, Color(0xFFff3f5e)),
               ],
-            ),
+            ):Container(),
             SizedBox(height:20),
             Material(
               elevation: 8.0,
@@ -57,7 +57,7 @@ class _DashboardState extends State<Dashboard> {
               shadowColor: AppColors.secondary,
               child:InkWell(
                 onTap: (){
-                  Navigator.push(context, MaterialPageRoute(builder: (context){return PassesAlotted(widget.post.data['eventCode'],widget.post.data['isOnline'],widget.post.data['ticketPrice']);}));
+                  Navigator.push(context, MaterialPageRoute(builder: (context){return PassesAlotted(widget.post.data['eventCode'],widget.post.data['isOnline'],widget.post.data['ticketPrice'],widget.post.data['isPaid']);}));
                 },
                 child:
                   Padding(
