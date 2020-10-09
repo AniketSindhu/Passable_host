@@ -54,4 +54,4 @@ app.*.map.json
 /local.properties
 /key.properties
 
-.jks
+*.jks
