@@ -111,7 +111,7 @@ Future<bool> editEvent ({String eventName,String eventCode,String eventDescripti
      eventNameArr.add(eventName.substring(0,j).toLowerCase());
 
   if(!isOnline){
-    await Firestore.instance.collection('events').document(eventCode).updateData({
+    await Firestore.instance.collection('events').document(eventCode).setData({
       'eventName':eventName,
       'eventDescription':eventDescription,
       'eventAddress':eventAddress,
@@ -125,10 +125,13 @@ Future<bool> editEvent ({String eventName,String eventCode,String eventDescripti
       'ticketPrice':ticketPrice,
       'eventCategory':eventCategory,
       'payment_detail':upi
-    }).then((value) { status=true;});
+    },merge: true).then((value) {
+      status=true;
+      print('ok1');
+    });
   }
   else{
-    await Firestore.instance.collection('OnlineEvents').document(eventCode).updateData({
+    await Firestore.instance.collection('OnlineEvents').document(eventCode).setData({
       'eventName':eventName,
       'eventDescription':eventDescription,
       'eventAddress':eventAddress,
@@ -142,7 +145,10 @@ Future<bool> editEvent ({String eventName,String eventCode,String eventDescripti
       'ticketPrice':ticketPrice,
       'eventCategory':eventCategory,
       'payment_detail':upi
-    }).then((value) { status= true;});
+    },merge: true).then((value) { 
+      status= true;
+      print('ok');
+      });
   }
   return status;
 }

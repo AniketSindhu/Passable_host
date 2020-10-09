@@ -270,6 +270,9 @@ class MapScreenState extends State<EditPage>
                                 new Flexible(
                                   child: new TextFormField(
                                     controller: nameController,
+                                    onChanged: (s){
+                                      print(nameController.text);
+                                    },
                                     validator: (value) => value.length<2?'*must be 2 character long':null,
                                     decoration: InputDecoration(
                                       hintText: 'Event Name',
@@ -757,10 +760,19 @@ class MapScreenState extends State<EditPage>
                 textColor: Colors.white,
                 color: Colors.green,
                 onPressed: () async{
-                  setState(() {
-                    _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
-                  });
+                  print(name);
+                  print(description);
+                  if (_formKey.currentState.validate()){
+                    double ticketPrice = double.parse(price);
+                    int ticketCount= int.parse(count);
+                    await FirebaseAdd().editEvent(eventName:name, eventCode:widget.post.data['eventCode'], eventDescription:description, eventAddress:address,maxAttendee:ticketCount, dateTime:datetime,eventLocation:location, hostName:hName, hostEmail:hEmail, hostPhone:hPhone, eventCategory:cat, isOnline:isOnline, isPaid:isPaid,ticketPrice:ticketPrice, upi:paymentInfo)
+                      .then((val){
+                        print('up');
+                          if(val){
+                          _status = true;
+                          FocusScope.of(context).requestFocus(new FocusNode());}
+                      });
+                    }
                 },
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(20.0)),
@@ -777,17 +789,10 @@ class MapScreenState extends State<EditPage>
                 textColor: Colors.white,
                 color: Colors.red,
                 onPressed: () async{
-                  if (_formKey.currentState.validate()){
-                    double ticketPrice = double.parse(price);
-                    int ticketCount= int.parse(count);
-                    await FirebaseAdd().editEvent(eventName:name, eventCode:widget.post.data['eventCode'], eventDescription:description, eventAddress:address,maxAttendee:ticketCount, dateTime:datetime,eventLocation:location, hostName:hName, hostEmail:hEmail, hostPhone:hPhone, eventCategory:cat, isOnline:isOnline, isPaid:isPaid,ticketPrice:ticketPrice, upi:paymentInfo)
-                      .then((val){
-                        setState(() {
-                          _status = true;
-                          FocusScope.of(context).requestFocus(new FocusNode());
-                        });
-                      });
-                    }
+                  setState(() {
+                    _status = true;
+                    FocusScope.of(context).requestFocus(new FocusNode());
+                  });
                   },
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(20.0)),
