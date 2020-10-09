@@ -38,6 +38,9 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     getUser();
   }
+  rebuild(){
+    setState((){});
+  }
   Future getEvents(int index) async{
     List<String>eventCodes=[];
     final QuerySnapshot result= await firestore.collection('users').document(uid).collection('eventsHosted').getDocuments();
@@ -180,7 +183,7 @@ class _HomePageState extends State<HomePage> {
                   child: ListView.builder(
                   itemCount: snapshot.data.length,
                   itemBuilder:(context,index){
-                    return eventCard(snapshot.data[index], height, width, context);
+                    return eventCard(snapshot.data[index], height, width, context,rebuild);
                   }
                 ),
               );

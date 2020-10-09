@@ -22,7 +22,8 @@ import 'package:flutter_icons/flutter_icons.dart';
 class DetailPage extends StatefulWidget {
   final DocumentSnapshot post;
   final String uid;
-  DetailPage(this.post,this.uid);
+  final Function rebuild;
+  DetailPage(this.post,this.uid,this.rebuild);
   @override
   _DetailPageState createState() => _DetailPageState();
 }
@@ -234,7 +235,10 @@ class _DetailPageState extends State<DetailPage> {
                       splashColor: AppColors.primary,
                       highlightColor: AppColors.primary,
                       onPressed: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context)=>EditPage(widget.post)));
+                        if(DateTime.now().isBefore(widget.post.data['eventDateTime'].toDate()))
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>EditPage(widget.post,widget.rebuild)));
+                        else 
+                          Fluttertoast.showToast(msg: 'You cant edit your past ;)',backgroundColor:Colors.red,textColor:Colors.white,gravity: ToastGravity.TOP);
                       }, 
                     ),
                     IconButton(

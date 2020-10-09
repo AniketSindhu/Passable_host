@@ -8,7 +8,7 @@ import 'package:passable_host/config/config.dart';
 import 'package:passable_host/EventDetails.dart';
 import 'package:skeleton_text/skeleton_text.dart';
 
-Widget eventCard(DocumentSnapshot event,double height,double width, BuildContext context){
+Widget eventCard(DocumentSnapshot event,double height,double width, BuildContext context,Function rebuild){
   return Padding(
     padding: const EdgeInsets.fromLTRB(0,0,0,20),
     child: Container(
@@ -17,7 +17,7 @@ Widget eventCard(DocumentSnapshot event,double height,double width, BuildContext
       child: InkWell(
           onTap: () async{
             String uid= await getCurrentUid();
-            Navigator.push(context, MaterialPageRoute(builder: (context){return DetailPage(event,uid);}));
+            Navigator.push(context, MaterialPageRoute(builder: (context){return DetailPage(event,uid,rebuild);}));
           },
           child: Card(
           color: Colors.deepPurple[50],

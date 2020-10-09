@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:passable_host/methods/firebaseAdd.dart';
@@ -15,7 +16,8 @@ import 'package:place_picker/place_picker.dart' as latlng;
 
 class EditPage extends StatefulWidget {
   final DocumentSnapshot post;
-  EditPage(this.post);
+  final Function rebuild;
+  EditPage(this.post,this.rebuild);
   @override
   MapScreenState createState() => MapScreenState();
 }
@@ -709,22 +711,87 @@ class MapScreenState extends State<EditPage>
                                     ),
                                   ],
                                 )),
-                        !_status ? _getActionButtons(
-                          name:nameController.text,
-                          description: descriptionController.text,
-                          cat:selectedCategory,
-                          datetime: dateTime,
-                          hName: hostNameController.text,
-                          hEmail: hostEmailController.text,
-                          hPhone: hostPhoneController.text,
-                          location: myLocation,
-                          address: eventAddController.text,
-                          price: ticketPriceController.text,
-                          paymentInfo: paymentDetailController.text,
-                          count: maxAttendeeController.text,
-                          isOnline: isOnline,
-                          isPaid:isPaid
-                        ) : new Container(),
+                        !_status ? 
+                        //_getActionButtons(
+                        //  name:nameController.text,
+                        //  description: descriptionController.text,
+                        //  cat:selectedCategory,
+                        //  datetime: dateTime,
+                        //  hName: hostNameController.text,
+                        //  hEmail: hostEmailController.text,
+                        //  hPhone: hostPhoneController.text,
+                        //  location: myLocation,
+                        //  address: eventAddController.text,
+                        //  price: ticketPriceController.text,
+                        //  paymentInfo: paymentDetailController.text,
+                        //  count: maxAttendeeController.text,
+                        //  isOnline: isOnline,
+                        //  isPaid:isPaid
+                        //)
+                        Padding(
+                              padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 45.0),
+                              child: new Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: <Widget>[
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(right: 10.0),
+                                      child: Container(
+                                          child: new RaisedButton(
+                                        child: new Text("Save"),
+                                        textColor: Colors.white,
+                                        color: Colors.green,
+                                        onPressed: () async{
+                                          if (_formKey.currentState.validate()){
+                                            double ticketPrice = double.parse(ticketPriceController.text);
+                                            int ticketCount= int.parse(maxAttendeeController.text);
+                                            await FirebaseAdd().editEvent(eventName:nameController.text, eventCode:widget.post.data['eventCode'], eventDescription:descriptionController.text, eventAddress:eventAddController.text,maxAttendee:ticketCount, dateTime:dateTime,eventLocation:myLocation, hostName:hostNameController.text, hostEmail:hostEmailController.text, hostPhone:hostPhoneController.text, eventCategory:selectedCategory, isOnline:isOnline, isPaid:isPaid,ticketPrice:ticketPrice, upi:paymentDetailController.text)
+                                              .then((val){
+                                                print('up');
+                                                  if(val){
+                                                    setState(() {
+                                                     _status = true;
+                                                      FocusScope.of(context).requestFocus(new FocusNode());
+                                                      Fluttertoast.showToast(msg: 'Event edited succesfuly',backgroundColor:Colors.green,textColor:Colors.white,gravity: ToastGravity.TOP);
+                                                      Navigator.pop(context);
+                                                      Navigator.pop(context);
+                                                      widget.rebuild();
+                                                    });
+                                                  }
+                                              });
+                                            }
+                                        },
+                                        shape: new RoundedRectangleBorder(
+                                            borderRadius: new BorderRadius.circular(20.0)),
+                                      )),
+                                    ),
+                                    flex: 2,
+                                  ),
+                                  Expanded(
+                                    child: Padding(
+                                      padding: EdgeInsets.only(left: 10.0),
+                                      child: Container(
+                                          child: new RaisedButton(
+                                        child: new Text("Cancel"),
+                                        textColor: Colors.white,
+                                        color: Colors.red,
+                                        onPressed: () async{
+                                          setState(() {
+                                            _status = true;
+                                            FocusScope.of(context).requestFocus(new FocusNode());
+                                          });
+                                          },
+                                        shape: new RoundedRectangleBorder(
+                                            borderRadius: new BorderRadius.circular(20.0)),
+                                      )),
+                                    ),
+                                    flex: 2,
+                                  ),
+                                ],
+                              ),
+                            )
+                        : new Container(),
                       ],
                     ),
                   ),
@@ -744,66 +811,66 @@ class MapScreenState extends State<EditPage>
     super.dispose();
   }
 
-  Widget _getActionButtons({@required String name,@required String description,@required String cat, @required String hName, @required String hPhone, @required String hEmail, @required DateTime datetime, @required GeoFirePoint location, @required String address, @required String price, @required String count, @required String paymentInfo,@required bool isOnline,@required bool isPaid}) {
-    return Padding(
-      padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 45.0),
-      child: new Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(right: 10.0),
-              child: Container(
-                  child: new RaisedButton(
-                child: new Text("Save"),
-                textColor: Colors.white,
-                color: Colors.green,
-                onPressed: () async{
-                  print(name);
-                  print(description);
-                  if (_formKey.currentState.validate()){
-                    double ticketPrice = double.parse(price);
-                    int ticketCount= int.parse(count);
-                    await FirebaseAdd().editEvent(eventName:name, eventCode:widget.post.data['eventCode'], eventDescription:description, eventAddress:address,maxAttendee:ticketCount, dateTime:datetime,eventLocation:location, hostName:hName, hostEmail:hEmail, hostPhone:hPhone, eventCategory:cat, isOnline:isOnline, isPaid:isPaid,ticketPrice:ticketPrice, upi:paymentInfo)
-                      .then((val){
-                        print('up');
-                          if(val){
-                          _status = true;
-                          FocusScope.of(context).requestFocus(new FocusNode());}
-                      });
-                    }
-                },
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0)),
-              )),
-            ),
-            flex: 2,
-          ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(left: 10.0),
-              child: Container(
-                  child: new RaisedButton(
-                child: new Text("Cancel"),
-                textColor: Colors.white,
-                color: Colors.red,
-                onPressed: () async{
-                  setState(() {
-                    _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
-                  });
-                  },
-                shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(20.0)),
-              )),
-            ),
-            flex: 2,
-          ),
-        ],
-      ),
-    );
-  }
+ // Widget _getActionButtons({@required String name,@required String description,@required String cat, @required String hName, @required String hPhone, @required String hEmail, @required DateTime datetime, @required GeoFirePoint location, @required String address, @required String price, @required String count, @required String paymentInfo,@required bool isOnline,@required bool isPaid}) {
+ //   return Padding(
+ //     padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 45.0),
+ //     child: new Row(
+ //       mainAxisSize: MainAxisSize.max,
+ //       mainAxisAlignment: MainAxisAlignment.start,
+ //       children: <Widget>[
+ //         Expanded(
+ //           child: Padding(
+ //             padding: EdgeInsets.only(right: 10.0),
+ //             child: Container(
+ //                 child: new RaisedButton(
+ //               child: new Text("Save"),
+ //               textColor: Colors.white,
+ //               color: Colors.green,
+ //               onPressed: () async{
+ //                 print(name);
+ //                 print(description);
+ //                 if (_formKey.currentState.validate()){
+ //                   double ticketPrice = double.parse(price);
+ //                   int ticketCount= int.parse(count);
+ //                   await FirebaseAdd().editEvent(eventName:name, eventCode:widget.post.data['eventCode'], eventDescription:description, eventAddress:address,maxAttendee:ticketCount, dateTime:datetime,eventLocation:location, hostName:hName, hostEmail:hEmail, hostPhone:hPhone, eventCategory:cat, isOnline:isOnline, isPaid:isPaid,ticketPrice:ticketPrice, upi:paymentInfo)
+ //                     .then((val){
+ //                       print('up');
+ //                         if(val){
+ //                         _status = true;
+ //                         FocusScope.of(context).requestFocus(new FocusNode());}
+ //                     });
+ //                   }
+ //               },
+ //               shape: new RoundedRectangleBorder(
+ //                   borderRadius: new BorderRadius.circular(20.0)),
+ //             )),
+ //           ),
+ //           flex: 2,
+ //         ),
+ //         Expanded(
+ //           child: Padding(
+ //             padding: EdgeInsets.only(left: 10.0),
+ //             child: Container(
+ //                 child: new RaisedButton(
+ //               child: new Text("Cancel"),
+ //               textColor: Colors.white,
+ //               color: Colors.red,
+ //               onPressed: () async{
+ //                 setState(() {
+ //                   _status = true;
+ //                   FocusScope.of(context).requestFocus(new FocusNode());
+ //                 });
+ //                 },
+ //               shape: new RoundedRectangleBorder(
+ //                   borderRadius: new BorderRadius.circular(20.0)),
+ //             )),
+ //           ),
+ //           flex: 2,
+ //         ),
+ //       ],
+ //     ),
+ //   );
+ // }
 
   Widget _getEditIcon() {
     return new GestureDetector(
