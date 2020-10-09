@@ -104,6 +104,49 @@ class FirebaseAdd{
   }
 }
 
+Future<bool> editEvent ({String eventName,String eventCode,String eventDescription,String eventAddress,int maxAttendee,DateTime dateTime,GeoFirePoint eventLocation,String hostName,String hostEmail,String hostPhone,String eventCategory, bool isOnline, bool isPaid,double ticketPrice,String upi}) async {
+  bool status;
+  List eventNameArr=[];
+  for(int j=1;j<=eventName.length;j++)
+     eventNameArr.add(eventName.substring(0,j).toLowerCase());
+
+  if(!isOnline){
+    await Firestore.instance.collection('events').document(eventCode).updateData({
+      'eventName':eventName,
+      'eventDescription':eventDescription,
+      'eventAddress':eventAddress,
+      'maxAttendee':maxAttendee,
+      'eventDateTime':dateTime,
+      'eventNameArr':eventNameArr,
+      'position':eventLocation.data,
+      'hostName':hostName,
+      'hostEmail':hostEmail,
+      'hostPhoneNumber':hostPhone,
+      'ticketPrice':ticketPrice,
+      'eventCategory':eventCategory,
+      'payment_detail':upi
+    }).then((value) { status=true;});
+  }
+  else{
+    await Firestore.instance.collection('OnlineEvents').document(eventCode).updateData({
+      'eventName':eventName,
+      'eventDescription':eventDescription,
+      'eventAddress':eventAddress,
+      'maxAttendee':maxAttendee,
+      'eventDateTime':dateTime,
+      'eventNameArr':eventNameArr,
+      'position':eventLocation.data,
+      'hostName':hostName,
+      'hostEmail':hostEmail,
+      'hostPhoneNumber':hostPhone,
+      'ticketPrice':ticketPrice,
+      'eventCategory':eventCategory,
+      'payment_detail':upi
+    }).then((value) { status= true;});
+  }
+  return status;
+}
+
   Future<bool> announce(String eventCode,String description,File image,bool isOnline,String eventName) async{
     String _uploadedFileURL;
     String id=randomAlphaNumeric(8);

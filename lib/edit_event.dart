@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:passable_host/methods/firebaseAdd.dart';
 import 'config/config.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as maps;
 import 'dart:async';
@@ -134,6 +135,7 @@ class MapScreenState extends State<EditPage>
   Widget build(BuildContext context) {
     bool isOnline=widget.post.data['isOnline'];
     bool isPaid=widget.post.data['isPaid'];
+    bool isProtected=widget.post.data['isProtected'];
     DateTime dateTime=widget.post.data['eventDateTime'].toDate();
     final hostNameController=TextEditingController(text: widget.post.data['hostName']);
     final hostEmailController=TextEditingController(text: widget.post.data['hostEmail']);
@@ -484,9 +486,9 @@ class MapScreenState extends State<EditPage>
                                     minTime: DateTime.now(),
                                     maxTime: DateTime.now().add(new Duration(days: 365))
                                   );
-                                  if (picked != null && picked != dateTime)
+                                  if (picked != null && picked != dateTime){
                                       dateTime= picked;
-                                      dateTimeController.text = DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime);
+                                      dateTimeController.text = DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime);}
                                 },
                                 child: AbsorbPointer(
                                   child: TextFormField(
@@ -704,7 +706,22 @@ class MapScreenState extends State<EditPage>
                                     ),
                                   ],
                                 )),
-                        !_status ? _getActionButtons() : new Container(),
+                        !_status ? _getActionButtons(
+                          name:nameController.text,
+                          description: descriptionController.text,
+                          cat:selectedCategory,
+                          datetime: dateTime,
+                          hName: hostNameController.text,
+                          hEmail: hostEmailController.text,
+                          hPhone: hostPhoneController.text,
+                          location: myLocation,
+                          address: eventAddController.text,
+                          price: ticketPriceController.text,
+                          paymentInfo: paymentDetailController.text,
+                          count: maxAttendeeController.text,
+                          isOnline: isOnline,
+                          isPaid:isPaid
+                        ) : new Container(),
                       ],
                     ),
                   ),
@@ -724,7 +741,7 @@ class MapScreenState extends State<EditPage>
     super.dispose();
   }
 
-  Widget _getActionButtons() {
+  Widget _getActionButtons({@required String name,@required String description,@required String cat, @required String hName, @required String hPhone, @required String hEmail, @required DateTime datetime, @required GeoFirePoint location, @required String address, @required String price, @required String count, @required String paymentInfo,@required bool isOnline,@required bool isPaid}) {
     return Padding(
       padding: EdgeInsets.only(left: 25.0, right: 25.0, top: 45.0),
       child: new Row(
@@ -739,7 +756,7 @@ class MapScreenState extends State<EditPage>
                 child: new Text("Save"),
                 textColor: Colors.white,
                 color: Colors.green,
-                onPressed: () {
+                onPressed: () async{
                   setState(() {
                     _status = true;
                     FocusScope.of(context).requestFocus(new FocusNode());
@@ -759,12 +776,19 @@ class MapScreenState extends State<EditPage>
                 child: new Text("Cancel"),
                 textColor: Colors.white,
                 color: Colors.red,
-                onPressed: () {
-                  setState(() {
-                    _status = true;
-                    FocusScope.of(context).requestFocus(new FocusNode());
-                  });
-                },
+                onPressed: () async{
+                  if (_formKey.currentState.validate()){
+                    double ticketPrice = double.parse(price);
+                    int ticketCount= int.parse(count);
+                    await FirebaseAdd().editEvent(eventName:name, eventCode:widget.post.data['eventCode'], eventDescription:description, eventAddress:address,maxAttendee:ticketCount, dateTime:datetime,eventLocation:location, hostName:hName, hostEmail:hEmail, hostPhone:hPhone, eventCategory:cat, isOnline:isOnline, isPaid:isPaid,ticketPrice:ticketPrice, upi:paymentInfo)
+                      .then((val){
+                        setState(() {
+                          _status = true;
+                          FocusScope.of(context).requestFocus(new FocusNode());
+                        });
+                      });
+                    }
+                  },
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(20.0)),
               )),
