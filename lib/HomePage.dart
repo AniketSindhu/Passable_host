@@ -85,8 +85,8 @@ class _HomePageState extends State<HomePage> {
                 RichText(
                    text: TextSpan(
                      children:<TextSpan>[
-                      TextSpan(text:"Pass'",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold))),
-                      TextSpan(text:"able",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.secondary,fontSize:35,fontWeight: FontWeight.bold))),
+                      TextSpan(text:"Pass",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold))),
+                      TextSpan(text:"able",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold))),
                     ]
                   )
                 ),

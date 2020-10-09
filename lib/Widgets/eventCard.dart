@@ -42,7 +42,7 @@ Widget eventCard(DocumentSnapshot event,double height,double width, BuildContext
                             width: width*0.3,  
                             height: height*0.3,  
                             decoration: BoxDecoration(  
-                                color: Colors.grey[400],  
+                                color: Colors.grey[400], 
                             ),  
                           ), 
                         ),

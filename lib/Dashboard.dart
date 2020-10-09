@@ -46,8 +46,8 @@ class _DashboardState extends State<Dashboard> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                colorCard("Gross Earning", widget.post.data['amountEarned'], 1, context, Color(0xFF1b5bff)),
-                colorCard("Real Earning", widget.post.data['amountEarned']*92/100, 1, context, Color(0xFFff3f5e)),
+                colorCard("Gross Earnings", widget.post.data['amountEarned'], 1, context, Color(0xFF1b5bff)),
+                colorCard("Net Earnings", widget.post.data['amountEarned']*92/100, 1, context, Color(0xFFff3f5e)),
               ],
             ),
             SizedBox(height:20),

@@ -31,9 +31,9 @@ class MapScreenState extends State<EditPage>
   Geoflutterfire geo = Geoflutterfire();
   PickResult mainResult;
   GeoFirePoint myLocation;
-  TextEditingController eventAddController;
-  TextEditingController ticketPriceController;
-  TextEditingController paymentDetailController;
+  TextEditingController eventAddController=TextEditingController();
+  TextEditingController ticketPriceController=TextEditingController();
+  TextEditingController paymentDetailController=TextEditingController();
   List<DropdownMenuItem> categoryList=[
     DropdownMenuItem(
       child: Text('Appearance/Singing',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,),),
@@ -145,7 +145,8 @@ class MapScreenState extends State<EditPage>
     final dateTimeController=TextEditingController(text: DateFormat('dd-MM-yyyy  hh:mm a').format(dateTime));
     eventAddController=TextEditingController(text: widget.post.data['eventAddress']);
     !isOnline?myLocation=geo.point(latitude: widget.post.data['position']['geopoint'].latitude, longitude: widget.post.data['position']['geopoint'].longitude):{};
-    isPaid? ticketPriceController.text= widget.post.data['ticketPrice'].toString():{};
+    isPaid? ticketPriceController= TextEditingController(text:widget.post.data['ticketPrice'].toString()):{};
+    selectedCategory= widget.post.data["eventCategory"];
     return new Scaffold(
       appBar: AppBar(title: Text("Edit Event"),),
       body: new Container(
@@ -154,54 +155,54 @@ class MapScreenState extends State<EditPage>
         children: <Widget>[
           Form(
             key: _formKey,
-            autovalidate: _autoValidate,
+            autovalidateMode: AutovalidateMode.always,
             child: Column(
               children: <Widget>[
-                new Container(
-                  height: 250.0,
-                  color: Colors.white,
-                  child: new Column(
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(top: 20.0),
-                        child: new Stack(fit: StackFit.loose, children: <Widget>[
-                          new Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              new Container(
-                                  width: 170.0,
-                                  height: 170.0,
-                                  decoration: new BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    image: new DecorationImage(
-                                      image: new NetworkImage(
-                                          widget.post.data['eventBanner']),
-                                      fit: BoxFit.cover,
-                                    ),
-                                  )),
-                            ],
-                          ),
-                          Padding(
-                              padding: EdgeInsets.only(top: 90.0, right: 100.0),
-                              child: new Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  new CircleAvatar(
-                                    backgroundColor: Colors.red,
-                                    radius: 25.0,
-                                    child: new Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                    ),
-                                  )
-                                ],
-                              )),
-                        ]),
-                      )
-                    ],
-                  ),
-                ),
+               // new Container(
+               //   height: 250.0,
+               //   color: Colors.white,
+               //   child: new Column(
+               //     children: <Widget>[
+               //       Padding(
+               //         padding: EdgeInsets.only(top: 20.0),
+               //         child: new Stack(fit: StackFit.loose, children: <Widget>[
+               //           new Row(
+               //             crossAxisAlignment: CrossAxisAlignment.center,
+               //             mainAxisAlignment: MainAxisAlignment.center,
+               //             children: <Widget>[
+               //               new Container(
+               //                   width: 170.0,
+               //                   height: 170.0,
+               //                   decoration: new BoxDecoration(
+               //                     shape: BoxShape.circle,
+               //                     image: new DecorationImage(
+               //                       image: new NetworkImage(
+               //                           widget.post.data['eventBanner']),
+               //                       fit: BoxFit.cover,
+               //                     ),
+               //                   )),
+               //             ],
+               //           ),
+               //           Padding(
+               //               padding: EdgeInsets.only(top: 90.0, right: 100.0),
+               //               child: new Row(
+               //                 mainAxisAlignment: MainAxisAlignment.center,
+               //                 children: <Widget>[
+               //                   new CircleAvatar(
+               //                     backgroundColor: Colors.red,
+               //                     radius: 25.0,
+               //                     child: new Icon(
+               //                       Icons.camera_alt,
+               //                       color: Colors.white,
+               //                     ),
+               //                   )
+               //                 ],
+               //               )),
+               //         ]),
+               //       )
+               //     ],
+               //   ),
+               // ),
                 new Container(
                   color: Color(0xffFFFFFF),
                   child: Padding(
@@ -322,7 +323,7 @@ class MapScreenState extends State<EditPage>
                               child: DropdownButtonFormField(   
                                 items: categoryList,
                                 validator: (value)=>selectedCategory==null?'Select a category':null,
-                                value: widget.post.data["eventCategory"],
+                                value: selectedCategory,
                                 decoration: InputDecoration(
                                     enabled: !_status,
                                     labelStyle: GoogleFonts.cabin(fontWeight: FontWeight.w600, fontSize: 18,color: Colors.black),
@@ -565,7 +566,7 @@ class MapScreenState extends State<EditPage>
                                 enabled: !_status,
                               ),
                             ):Container(),
-                            isPaid?Padding(
+                            Padding(
                               padding: EdgeInsets.only(
                                 left: 25.0, right: 25.0, top: 30.0),
                               child: new Column(
@@ -580,7 +581,129 @@ class MapScreenState extends State<EditPage>
                                   ),
                                 ],
                               ),
-                            ):Container(),
+                            ),
+                            isPaid?Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'Ticket Price',
+                                          style: TextStyle(
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )):Container(),
+                            isPaid?Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextFormField(
+                                        keyboardType: TextInputType.number,
+                                        validator: (value) =>value.trim().length!=0?double.parse(value)>=20?null:'Enter a valid amount ( >20 rs)':'Enter a valid amount ( >20 rs)',
+                                        controller: ticketPriceController,
+                                        decoration: new InputDecoration(
+                                            prefixIcon: Icon(FlutterIcons.rupee_faw),
+                                            hintText: 'Ticket Price'),
+                                        enabled: !_status,
+                                      ),
+                                    ),
+                                  ],
+                                )):Container(),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'Ticket Count',
+                                          style: TextStyle(
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextFormField(
+                                        keyboardType: TextInputType.number,
+                                        validator: (value) => value.trim().length!=0?int.parse(value)>=10?null:'Enter a valid amount (>10)':'Enter a valid amount (>10)',
+                                        controller: maxAttendeeController,
+                                        decoration: new InputDecoration(
+                                            hintText: 'Ticket Count'),
+                                        enabled: !_status,
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 25.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Column(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        new Text(
+                                          'Payment Info',
+                                          style: TextStyle(
+                                              fontSize: 15.0,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )),
+                            Padding(
+                                padding: EdgeInsets.only(
+                                    left: 25.0, right: 25.0, top: 2.0),
+                                child: new Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: <Widget>[
+                                    new Flexible(
+                                      child: new TextFormField(
+                                        validator: (value) {
+                                          Pattern pattern =r'^[\w\.\-_]{3,}@[a-zA-Z]{3,}';
+                                          RegExp regex = new RegExp(pattern);
+                                          if(!regex.hasMatch(value)){
+                                            return 'Enter valid upi id';
+                                          }
+                                          else 
+                                            return null;
+                                        },
+                                        controller: paymentDetailController,
+                                        decoration: new InputDecoration(
+                                            hintText: 'Payment Info'),
+                                        enabled: !_status,
+                                      ),
+                                    ),
+                                  ],
+                                )),
                         !_status ? _getActionButtons() : new Container(),
                       ],
                     ),
