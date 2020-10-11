@@ -37,6 +37,7 @@ class FirebaseAdd{
     Firestore.instance.collection('partners').document(partner).collection('eventsPartnered').document(eventCode)
       .setData({
         'eventCode':eventCode,
+        'isOnline':isOnline
       });
   }
 
@@ -138,7 +139,6 @@ Future<bool> editEvent ({String eventName,String eventCode,String eventDescripti
       'maxAttendee':maxAttendee,
       'eventDateTime':dateTime,
       'eventNameArr':eventNameArr,
-      'position':eventLocation.data,
       'hostName':hostName,
       'hostEmail':hostEmail,
       'hostPhoneNumber':hostPhone,

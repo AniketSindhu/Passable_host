@@ -159,7 +159,7 @@ class MapScreenState extends State<EditPage>
         children: <Widget>[
           Form(
             key: _formKey,
-            autovalidateMode: AutovalidateMode.always,
+            autovalidate: true,
             child: Column(
               children: <Widget>[
                // new Container(
