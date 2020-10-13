@@ -4,6 +4,7 @@ class User{
   String name;
   String email;
   String phone;
+  
   User({this.email,this.name,this.phone,this.uid});
 
   factory User.fromDocument(DocumentSnapshot doc){

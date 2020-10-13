@@ -85,14 +85,7 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                RichText(
-                   text: TextSpan(
-                     children:<TextSpan>[
-                      TextSpan(text:"Pass",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold))),
-                      TextSpan(text:"able",style:GoogleFonts.lora(textStyle:TextStyle(color: AppColors.primary,fontSize:35,fontWeight: FontWeight.bold))),
-                    ]
-                  )
-                ),
+                Image.asset('assets/logo.png',width: 60,),
                 PopupMenuButton(
                   icon:Icon(Icons.more_horiz,color: AppColors.primary,size:30),
                   color: AppColors.primary,

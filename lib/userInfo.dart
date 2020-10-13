@@ -98,7 +98,7 @@ class _UserInfoPageState extends State<UserInfoPage> {
                 icon: Icon(Icons.person),
                 hint: 'Enter your full name',
                 controller: _nameController,
-                number: true,
+                number: false,
                 maxLines: 1,
               ):Container(),
               SizedBox(height:30),
