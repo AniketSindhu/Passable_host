@@ -1077,54 +1077,27 @@ class _TicketInfoState extends State<TicketInfo> {
             SizedBox(height:10),
             Divider(thickness:1),
             SizedBox(height:8),
-            Text('Event Protection',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
-            Padding(
-              padding: const EdgeInsets.only(top:2,bottom:12),
-              child: Text(
-                'Yes : Only People with code can buy or redeem passes of this event.\nNo: Anyone can buy passes of this event aisa krde',
-                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f),)),
-            ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                InkWell(
-                  onTap: (){
-                    onProtectSelect('yes');
+                Text('Event Protection',style: GoogleFonts.cabin(fontWeight:FontWeight.w800,fontSize:34,color: Color(0xff1E0A3C),)),
+                Switch(
+                  value: isProtected,
+                  activeColor: AppColors.secondary,
+                  onChanged: (value){
+                    setState(() {
+                      isProtected=value;
+                    });
                   },
-                  child: Container(
-                    width: 125,
-                    decoration: BoxDecoration( 
-                      borderRadius: BorderRadius.circular(10),
-                      border:Border.all(width: 1.5,color: AppColors.primary),
-                      color: !isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
-                    ),
-                    
-                    child:Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Center(child: Text('Yes',style: GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary),)),
-                    ),
-                  ),
                 ),
-                SizedBox(width:20),
-                InkWell(
-                  onTap: (){
-                    onProtectSelect('');
-                  },
-                  child: Container(
-                    width: 125,
-                    decoration: BoxDecoration( 
-                      borderRadius: BorderRadius.circular(10),
-                      border:Border.all(width: 1.5,color: AppColors.primary),
-                      color: isProtected?Colors.white:AppColors.tertiary.withOpacity(1),
-                    ),   
-                    child:Padding(
-                      padding: const EdgeInsets.all(15.0),
-                      child: Center(child: Text('No',style:GoogleFonts.cabin(fontWeight: FontWeight.w800, fontSize: 20,color: AppColors.primary))),
-                    ),
-                  ),
-                ), 
               ],
             ),
+            Padding(
+              padding: const EdgeInsets.only(top:2,bottom:12),
+              child: isProtected?Text(
+                'Only People with code can buy or redeem passes of this event.',
+                style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f)))
+            :Text('Anyone can buy passes of this event',style:GoogleFonts.mavenPro(fontWeight:FontWeight.w500,fontSize:15,color: Color(0xff39364f)))),
             isPaid?SizedBox(height:10):Container(),
             isPaid?Divider(thickness:1):Container(),
             isPaid?SizedBox(height:8):Container(),
