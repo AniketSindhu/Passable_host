@@ -26,6 +26,7 @@ import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_cropper/image_cropper.dart';
 
 class CreateEvent extends StatefulWidget {
   final String uid;
@@ -620,8 +621,24 @@ class _PosterSelectState extends State<PosterSelect> {
 
     Future getImage() async {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
+      _image = await ImageCropper.cropImage(
+      sourcePath: pickedFile.path,
+      aspectRatioPresets: [
+        CropAspectRatioPreset.square,
+        CropAspectRatioPreset.ratio3x2,
+        CropAspectRatioPreset.original,
+        CropAspectRatioPreset.ratio4x3,
+        CropAspectRatioPreset.ratio16x9
+      ],
+      androidUiSettings: AndroidUiSettings(
+          toolbarTitle: 'Crop your poster',
+          toolbarColor: AppColors.tertiary,
+          toolbarWidgetColor: AppColors.primary,
+          initAspectRatio: CropAspectRatioPreset.original,
+          lockAspectRatio: false),
+          compressQuality: 70
+    );
     setState(() {
-      _image = File(pickedFile.path);
     });
   }
 
@@ -800,7 +817,7 @@ class _TicketInfoState extends State<TicketInfo> {
         gravity: ToastGravity.TOP
       );   
     }
-    else if(!regex.hasMatch(upiController.text)){
+    else if(!regex.hasMatch(upiController.text)&&isPaid==true){
         Fluttertoast.showToast(
           msg:'Enter Valid UPI ID',
           backgroundColor: Colors.red,
@@ -859,7 +876,7 @@ class _TicketInfoState extends State<TicketInfo> {
           widget.image, 
           widget.eventDateTime, 
           widget.location, 
-          widget.hostName, 
+          widget.hostName,
           widget.hostEmail, 
           widget.hostPhoneNumber, 
           widget.eventCategory, 

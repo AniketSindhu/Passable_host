@@ -249,8 +249,8 @@ class _DetailPageState extends State<DetailPage> {
                       onPressed:()async{
                         await FlutterShare.share(
                           title: 'Get entry pass for ${widget.post.data['eventName']}',
-                          text: ' Get passes for ${widget.post.data['eventName']} happening on ${DateFormat('dd-MM-yyyy AT hh:mm a').format(widget.post.data['eventDateTime'].toDate())}\n\n Event Code:''${widget.post.data['eventCode']}''',
-                          linkUrl: 'https://passable.in/',
+                          text: ' Get passes for ${widget.post.data['eventName']} happening on ${DateFormat('dd-MM-yyyy AT hh:mm a').format(widget.post.data['eventDateTime'].toDate())}\n\n Event Code:''${widget.post.data['eventCode']}''\n\n Open App:\nhttps://play.google.com/store/apps/details?id=com.aniket.passable \n\nPassable',
+                          linkUrl: 'https://www.passable.in/',
                           chooserTitle: 'Get entry pass for ${widget.post.data['eventName']}'
                         );
                       }
